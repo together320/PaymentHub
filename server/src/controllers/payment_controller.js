@@ -5,9 +5,9 @@ import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
 const TRANSXND_URL = 'https://devpg.transxnd.com/api';
-const TRANSXND_ID = "payzio_demo";
-const TRANSXND_PWD = "payzio_demo";
-const TRANSXND_KEY = "80b747f8c880084d496b2f0a1ec38d037df47234c5988164dde5f5552ac1892a4c93fe9804984219185ae5c32a71f0aa995df4b83118429fcb8e1edc5083949a";
+const TRANSXND_ID = "payhub";
+const TRANSXND_PWD = "payhub";
+const TRANSXND_KEY = "78996876853450bf2808efd88f8a1d656a39f043bae25abd6c2c99f2b938b057cb1946f63693b80afba81161fa3c75ef04943a2733ca3dd85b52295caf47b9a8";
 
 export const process_hpp = async (req, res) => {
   const apiKey = req.headers['x-api-key'];

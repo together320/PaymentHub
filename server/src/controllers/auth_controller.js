@@ -48,7 +48,7 @@ export const login =  async (req, res) => {
 };
 
 export const register =  async (req, res) => {
-    const { name, email, password, type="2d", currency="USD" } = req.body;
+    const { name, email, password, type="2D", currency="USD" } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Please enter all fields' });

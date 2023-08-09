@@ -38,7 +38,7 @@ function Login() {
   var [passwordValue, setPasswordValue] = useState("");
 
   const handleChangeTab = (id) => {
-    alert(id);
+    // alert(id);
     setActiveTabId(id)
     // setErrorMessage(null)
   }
@@ -67,7 +67,7 @@ function Login() {
       setErrorMessage,
     )
     console.log(isRegistered);
-    alert(isRegistered);
+    // alert(isRegistered);
     if (isRegistered) {
       setActiveTabId(0);
     }
@@ -98,7 +98,7 @@ function Login() {
                 {errorMessage && (
                   <Fade in={true}>
                     <Typography color="secondary" className={classes.errorMessage}>
-                      {errorMessage}
+                      {errorMessage.toString()}
                     </Typography>
                   </Fade>
                 )}
