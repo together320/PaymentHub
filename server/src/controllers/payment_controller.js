@@ -4,10 +4,29 @@ import getCountryISO3 from "country-iso-2-to-3";
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
+
+// live
+// const TRANSXND_URL = 'https://pay.transxnd.com/api';
+// const TRANSXND_ID = "Payhub";
+// const TRANSXND_PWD = "Payhub";
+// const TRANSXND_KEY = "91e03e8147911f8d9a380af0065529a64bc40218c526c0c372e4c2c7a209f3d99630b316c244fbf5388a86aae160a64cbc3e0db13348a96c203dfb1ce2ce7edf";
+
+
+// sandbox
 const TRANSXND_URL = 'https://devpg.transxnd.com/api';
 const TRANSXND_ID = "payhub";
 const TRANSXND_PWD = "payhub";
 const TRANSXND_KEY = "78996876853450bf2808efd88f8a1d656a39f043bae25abd6c2c99f2b938b057cb1946f63693b80afba81161fa3c75ef04943a2733ca3dd85b52295caf47b9a8";
+
+
+// PRODUCTION
+// "client_id": "Payhub",
+// "key": "91e03e8147911f8d9a380af0065529a64bc40218c526c0c372e4c2c7a209f3d99630b316c244fbf5388a86aae160a64cbc3e0db13348a96c203dfb1ce2ce7edf"
+
+
+// SANDBOX
+// "client_id": "payhub",
+// "key": "78996876853450bf2808efd88f8a1d656a39f043bae25abd6c2c99f2b938b057cb1946f63693b80afba81161fa3c75ef04943a2733ca3dd85b52295caf47b9a8" 
 
 export const process_hpp = async (req, res) => {
   const apiKey = req.headers['x-api-key'];
@@ -85,7 +104,9 @@ export const process_hpp = async (req, res) => {
         }); 
         res.status(200).json({
           status: "success",
-          paymentUrl: resp.data.response.paymentUrl
+          paymentUrl: resp.data.response.paymentUrl,
+          session: resp.data.response.session,
+          hash: resp.data.response.hash
         });
       } else {
         res.status(400).json({
@@ -153,7 +174,8 @@ export const callback_transxnd_hpp = async (req, res) => {
         {
           orderId: transaction.orderId,
           status: "success",
-          transactionID: transaction.transactionId,
+          hash: transaction.hash,
+          transactionId: transaction.transactionId,
           amount: transaction.amount,
           currency: transaction.currency,
           message: "This transaction has been completed."
