@@ -53,11 +53,11 @@ const Transactions = () => {
       headerName: "Solution",
       flex: 0.5,
     },
-    {
-      field: "name",
-      headerName: "Name",
-      flex: 1,
-    },
+    // {
+    //   field: "name",
+    //   headerName: "Name",
+    //   flex: 1,
+    // },
     {
       field: "cardNumber",
       headerName: "Card Number",
