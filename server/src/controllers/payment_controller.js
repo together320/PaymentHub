@@ -143,13 +143,13 @@ export const process_2d = async (req, res) => {
     const merchant = await User.findOne({name: data.mid, apiKey, status: 'activated'});
     if (!merchant) {
       return res.status(200).json({
-        message: "There is not existing activated merchant with API key"
+        error: "There is not existing activated merchant with API key"
       })
     }
 
     if (merchant.type !== "2D") {
       return res.status(200).json({
-        message: "This merchant is not allowed 2D transactions"
+        error: "This merchant is not allowed 2D transactions"
       })
     }
 
