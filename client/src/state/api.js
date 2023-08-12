@@ -147,7 +147,19 @@ export const generalApi = {
         getUser: (id) => http.get(url + `/getUser/${id}`).then(res => res.data),
         addUser: ({name, email, password, type, currency, apiKey}) => http.post(url + `/addUser`, {name, email, password, type, currency, apiKey}),
         updateUser: ({id, name, type, currency, apiKey}) => http.post(url + `/updateUser`, {id, name, type, currency, apiKey}),
-        deleteUser: (id) => http.post(url + `/deleteUser`, {id})
+        deleteUser: (id) => http.post(url + `/deleteUser`, {id}),
+        deleteTransaction: (id) => http.post(url + `/deleteTransaction`, {id}),
+
+    }
+  },
+
+};
+
+export const paymentApi = {
+  payment(url = 'payment') {
+    return {
+        payment2d: (headers, payload) => http.post(url + `/2d`, payload, { headers }),
+        
     }
   },
 

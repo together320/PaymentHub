@@ -6,9 +6,10 @@ import {
   getPieStats,
   signin,
   signup,
+  addUser,
   updateUser,
   deleteUser,
-  addUser,
+  deleteTransaction,
 } from "../controllers/general_controller.js";
 
 const router = express.Router();
@@ -22,5 +23,6 @@ router.get("/pie", getPieStats);
 router.post("/updateUser", updateUser);
 router.post("/addUser", addUser);
 router.post("/deleteUser", deleteUser);
+router.post("/deleteTransaction", deleteTransaction);
 
 export default router;

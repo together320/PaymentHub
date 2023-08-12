@@ -486,3 +486,22 @@ export const deleteUser =  async (req, res) => {
     });
   }
 };
+
+export const deleteTransaction =  async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    const user = await Transaction.findByIdAndDelete(id);
+    if (!user) throw Error('Something went wrong deleting the transaction');
+
+    res.status(200).json({
+      success: true
+    });
+
+  } catch (e) {
+    res.status(400).json({ 
+      success: false,
+      error: e.message 
+    });
+  }
+};

@@ -48,24 +48,46 @@ const Sidebar = ({
 
   let navItems = [];
   if (user.role === "merchant") {
-    navItems = [
-      {
-        text: "Dashboard",
-        icon: <HomeOutlined />,
-      },
-      {
-        text: "Transactions",
-        icon: <ReceiptLongOutlined />,
-      },
-      // {
-      //   text: "Point of Sale",
-      //   icon: <PointOfSaleOutlined />,
-      // },
-      {
-        text: "Profile",
-        icon: <PublicOutlined />,
-      },
-    ];
+    if (user.type === "2D") {
+      navItems = [
+        {
+          text: "Dashboard",
+          icon: <HomeOutlined />,
+        },
+        {
+          text: "Transactions",
+          icon: <ReceiptLongOutlined />,
+        },
+        {
+          text: "Point of Sale",
+          icon: <PointOfSaleOutlined />,
+        },
+        {
+          text: "Profile",
+          icon: <PublicOutlined />,
+        },
+      ];
+    } else {
+      navItems = [
+        {
+          text: "Dashboard",
+          icon: <HomeOutlined />,
+        },
+        {
+          text: "Transactions",
+          icon: <ReceiptLongOutlined />,
+        },
+        {
+          text: "Point of Sale",
+          icon: <PointOfSaleOutlined />,
+        },
+        {
+          text: "Profile",
+          icon: <PublicOutlined />,
+        },
+      ];
+    }
+    
   } else if (user.role === "admin" || user.role === "superadmin") {
     navItems = [
       {

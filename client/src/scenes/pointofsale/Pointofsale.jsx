@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 import { DataGrid } from "@mui/x-data-grid";
-import { useGetTransactionsQuery } from "state/api";
+import { useGetTransactionsQuery, paymentApi } from "state/api";
 import Header from "components/Header";
 import { Box, useTheme, useMediaQuery, Button } from "@mui/material";
 import InputLabel from '@mui/material/InputLabel';
@@ -15,75 +16,14 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { YearCalendar } from '@mui/x-date-pickers/YearCalendar';
 import { MonthCalendar } from '@mui/x-date-pickers/MonthCalendar';
+import Swal from 'sweetalert2';
 
 const Transactions = () => {
   const theme = useTheme();
   const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
-
-  // values to send to backend
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
-  const [sort, setSort] = useState({});
-  const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
-
-  const [subMerchant, setSubMerchant] = useState('');
-  const [subMerchantError, setSubMerchantError] = useState('');
-
-  const [gatewayMethod, setGatewayMethod] = useState('');
-  const [gatewayMethodError, setGatewayMethodError] = useState('');
-
-  const [firstName, setFirstName] = useState('');
-  const [firstNameError, setFirstNameError] = useState('');  
   
-  const [lastName, setLastName] = useState('');
-  const [lastNameError, setLastNameError] = useState('');  
-  
-  const [phone, setPhone] = useState('');
-  const [phoneError, setPhoneError] = useState('');  
-  
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');  
-  
-  const [state, setState] = useState('');
-  const [stateError, setStateError] = useState('');  
-  
-  const [address, setAddress] = useState('');
-  const [addressError, setAddressError] = useState('');  
-  
-  const [zipCode, setZipCode] = useState('');
-  const [zipCodeError, setZipCodeError] = useState('');
-
-  const [city, setCity] = useState('');
-  const [cityError, setCityError] = useState('');  
-  
-  const [country, setCountry] = useState(null);
-  const [countryError, setCountryError] = useState('');
-  
-  const [clientIP, setClientIP] = useState('');
-  const [clientIPError, setClientIPError] = useState('');  
-  
-  const [amount, setAmount] = useState('');
-  const [amountError, setAmountError] = useState('');
-  
-  const [currency, setCurrency] = useState('');
-  const [currencyError, setCurrencyError] = useState('');
-  
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardNumberError, setCardNumberError] = useState('');  
-  
-  const [cardName, setCardName] = useState('');
-  const [cardNameError, setCardNameError] = useState('');  
-  
-  const [cardType, setCardType] = useState('');
-  const [cardTypeError, setCardTypeError] = useState('');  
-  
-  const [cardExpDate, setCardExpDate] = useState(dayjs());
-  const [cardExpDateError, setCardExpDateError] = useState('');  
-  
-  const [cardCVV, setCardCVV] = useState('');
-  const [cardCVVError, setCardCVVError] = useState('');  
-  
+  const { getAuthUser} = useContext(AuthContext);
+  const authUser = getAuthUser();
 
   const countries = [
     { code: 'AD', label: 'Andorra', phone: '376' },
@@ -510,6 +450,77 @@ const Transactions = () => {
     { code: 'ZW', label: 'Zimbabwe', phone: '263' },
   ];
 
+  // values to send to backend
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+  const [sort, setSort] = useState({});
+  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  const [subMerchant, setSubMerchant] = useState('');
+  const [subMerchantError, setSubMerchantError] = useState('');
+
+  const [gatewayMethod, setGatewayMethod] = useState('');
+  const [gatewayMethodError, setGatewayMethodError] = useState('');
+
+  const [firstName, setFirstName] = useState('');
+  const [firstNameError, setFirstNameError] = useState('');  
+  
+  const [lastName, setLastName] = useState('');
+  const [lastNameError, setLastNameError] = useState('');  
+  
+  const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');  
+  
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');  
+  
+  const [state, setState] = useState('');
+  const [stateError, setStateError] = useState('');  
+  
+  const [address, setAddress] = useState('');
+  const [addressError, setAddressError] = useState('');  
+  
+  const [zipCode, setZipCode] = useState('');
+  const [zipCodeError, setZipCodeError] = useState('');
+
+  const [city, setCity] = useState('');
+  const [cityError, setCityError] = useState('');   
+  
+  const getDefaultCountry = () => {
+    const defaultCountry = countries.find(country => country.code === 'US');
+    return defaultCountry || null;
+  };
+
+  const [country, setCountry] = useState(getDefaultCountry());
+  const [countryError, setCountryError] = useState('');
+  
+  const [clientIP, setClientIP] = useState('');
+  const [clientIPError, setClientIPError] = useState('');  
+  
+  const [amount, setAmount] = useState('');
+  const [amountError, setAmountError] = useState('');
+  
+  const [currency, setCurrency] = useState('USD');
+  const [currencyError, setCurrencyError] = useState('');
+  
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardNumberError, setCardNumberError] = useState('');  
+  
+  const [cardName, setCardName] = useState('');
+  const [cardNameError, setCardNameError] = useState('');  
+  
+  const [cardType, setCardType] = useState('');
+  const [cardTypeError, setCardTypeError] = useState('');  
+  
+  const [cardExpDate, setCardExpDate] = useState(dayjs());
+  const [cardExpDateError, setCardExpDateError] = useState('');  
+  
+  const [cardCVV, setCardCVV] = useState('');
+  const [cardCVVError, setCardCVVError] = useState('');  
+
   const handleSubmit = (event) => {
     event.preventDefault();
   
@@ -619,23 +630,23 @@ const Transactions = () => {
       setCurrencyError('');
     }
 
-    if (!/^\d{16}$/.test(cardNumber)) {
-      setCardNumberError('Card number must be a 16-digit number.');
-    } else {
-      setCardNumberError('');
-    }
+    // if (!/^\d{16}$/.test(cardNumber)) {
+    //   setCardNumberError('Card number must be a 16-digit number.');
+    // } else {
+    //   setCardNumberError('');
+    // }
 
-    if (!cardName) {
-      setCardNameError('Please enter name on card.');
-    } else {
-      setCardNameError('');
-    }
+    // if (!cardName) {
+    //   setCardNameError('Please enter name on card.');
+    // } else {
+    //   setCardNameError('');
+    // }
 
-    if (!cardType) {
-      setCardTypeError('Please select a card type.');
-    } else {
-      setCardTypeError('');
-    }
+    // if (!cardType) {
+    //   setCardTypeError('Please select a card type.');
+    // } else {
+    //   setCardTypeError('');
+    // }
 
     // console.log('date', cardExpDate, typeof cardExpDate)
     if (cardExpDate === null) {
@@ -653,10 +664,10 @@ const Transactions = () => {
     }
 
     if (
-      subMerchant &&
-      !subMerchantError && 
-      gatewayMethod &&
-      !gatewayMethodError &&
+      // subMerchant &&
+      // !subMerchantError && 
+      // gatewayMethod &&
+      // !gatewayMethodError &&
       firstName && 
       !firstNameError &&
       lastName && 
@@ -675,30 +686,106 @@ const Transactions = () => {
       !cityError &&
       country !== null &&
       !countryError &&
-      !clientIP &&
+      clientIP &&
+      !clientIPError &&
       amount &&
       !amountError &&
       currency &&
       !currencyError &&
       cardNumber &&
       !cardNumberError &&
-      cardName &&
-      !cardNameError &&
-      cardType &&
-      !cardTypeError &&
+      // cardName &&
+      // !cardNameError &&
+      // cardType &&
+      // !cardTypeError &&
       cardExpDate !== null &&
       !cardExpDateError &&
       cardCVV &&
       !cardCVVError
     ) {
-      alert('Submitting...');
+
+      const monthString = new Date(0, cardExpDate.$M).toLocaleString('en-US', { month: '2-digit' });
+      const cardNumberFilterd = cardNumber.replace(/\s/g, '')
+      // alert('Submitting...' + cardNumberFilterd + ' ' + cardNumber + ' ' + monthString);
+
+      const headers = {
+        'Content-Type': 'application/json',
+        'x-api-key': authUser.apiKey,
+      }
+
+      const payload = {
+        mid: authUser.name,
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phone: phone,
+        address: address,
+        city: city,
+        state: state,
+        country: country.code,
+        zipcode: zipCode,
+        clientIp: clientIP,
+        amount: amount,
+        currency: currency,
+        orderId: "",
+        orderDetail: "virtual terminal",
+        // cardType: cardType,
+        cardNumber: cardNumberFilterd,
+        cardCVV: cardCVV,
+        cardExpMonth: monthString,
+        cardExpYear: cardExpDate.$y,
+        redirectUrl: "",
+        callbackUrl: "",
+      }
+
+      setLoading(true);
+
+      paymentApi.payment().payment2d(headers, payload)
+        .then(res => {   
+          console.log('vitual terminal res', res.data);
+          if (res.data.error) {
+            // alert(res.data.error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: res.data.error,
+              showConfirmButton: true,
+            });
+          } else {
+            // alert(res.data.status + ': ' + res.data.message);
+            Swal.fire({
+              icon: 'success',
+              title: 'Success!',
+              text: res.data.message,
+              showConfirmButton: true,
+            });
+          }          
+          setLoading(false); 
+        })
+        .catch(err => {
+          // alert(err.message);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: err.message,
+            showConfirmButton: true,
+          });
+          setLoading(false);
+        });
       
     } else {
+      // console.log(cardExpDate);
       // if (country !== null)
       //   alert(country.code);
       // if (cardExpDate !== null)
       //   alert(cardExpDate.$y + ' ' + (cardExpDate.$M + 1));
-      
+      // alert('Please check the input values.')
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Please check the input values.',
+        showConfirmButton: true,
+      });
       return;
     }
 
@@ -762,15 +849,32 @@ const Transactions = () => {
   };
 
   const handleCardNumberChange = (event) => {
-    const inputValue = event.target.value;
+    // let inputValue = event.target.value;
 
-    // Check for non-digit characters using a regular expression
-    if (!/^\d*$/.test(inputValue)) {
-      setCardNumberError('Card number must only contain digits.');
-    } else {
-      setCardNumber(inputValue);
-      setCardNumberError('');
+    // // Check for non-digit characters using a regular expression
+    // if (!/^\d*$/.test(inputValue)) {
+    //   setCardNumberError('Card number must only contain digits.');
+    // } else {
+    //   setCardNumber(inputValue);
+    //   setCardNumberError('');
+    // }
+
+    let formattedValue = event.target.value;
+    // Remove any existing spaces from the input value
+    formattedValue = formattedValue.replace(/\s/g, '');
+    // Add spaces every 4 characters
+    if (formattedValue.length > 0) {
+      formattedValue = formattedValue.match(/.{1,4}/g).join(' ');
     }
+    setCardNumber(formattedValue);
+
+    // Validate the card number length
+    if (formattedValue.replace(/\s/g, '').length === 16) {
+      setCardNumberError('');
+    } else {
+      setCardNumberError('Invalid card number');
+    }
+
   };
 
   const handleCardNameChange = (event) => {
@@ -807,489 +911,500 @@ const Transactions = () => {
   return (
     <Box m="1.5rem 2.5rem" pb="1.5rem">
       <Header title="Virtual Terminal" subTitle="" />
-      <Box
-        mt="20px"
-        display="grid"
-        gridTemplateColumns="repeat(12, 1fr)"
-        gridAutoRows="60px"
-        gap="20px"
-        sx={{
-          "& > div": { gridColumn: isNonMediumScreens ? undefined : "span 12" },
-        }}
-      >
+      {
+        loading 
+        ?
+        "Processing. Please don't take actions until you get the result..."
+        :
         <Box
-          gridColumn="span 12"
-          gridRow="span 2"
-          backgroundColor={theme.palette.background.alt}
-          p="1rem"
-          borderRadius="0.55rem"
+          mt="20px"
+          display="grid"
+          gridTemplateColumns="repeat(12, 1fr)"
+          gridAutoRows="60px"
+          gap="20px"
+          sx={{
+            "& > div": { gridColumn: isNonMediumScreens ? undefined : "span 12" },
+          }}
         >
-          <Header title="" subTitle="SUB MERCHANT DETAILS" />
-          <Box
-            display="flex"
-            flexDirection="row"
-            justifyContent="space-around"
+          {/* <Box
+            gridColumn="span 12"
+            gridRow="span 2"
+            backgroundColor={theme.palette.background.alt}
+            p="1rem"
+            borderRadius="0.55rem"
           >
+            <Header title="" subTitle="SUB MERCHANT DETAILS" />
             <Box
-              width="100%"
-              gridColumn="span 12"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
+              display="flex"
+              flexDirection="row"
+              justifyContent="space-around"
             >
-              <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">Sub Merchant</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={subMerchant}
-                  label="Sub Merchant"
-                  onChange={handleSubMerchantChange}
-                  error={!!subMerchantError}
-                  helperText={subMerchantError}
-                >
-                  <MenuItem value={1}>Merchant 2D</MenuItem>
-                  <MenuItem value={2}>Merchant 3D</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-            <Box
-              width="100%"
-              gridColumn="span 12"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">Gateway Method</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={gatewayMethod}
-                  label="Gateway Method"
-                  onChange={handleGatewayMethodChange}
-                  error={!!gatewayMethodError}
-                  helperText={gatewayMethodError}
-                >
-                  <MenuItem value={1}>Bank 01</MenuItem>
-                  <MenuItem value={2}>Bank 02</MenuItem>
-                  <MenuItem value={3}>Bank 03</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>          
-        </Box>
-        <Box
-          gridColumn="span 12"
-          gridRow="span 6"
-          backgroundColor={theme.palette.background.alt}
-          p="1rem"
-          borderRadius="0.55rem"
-        >
-          <Header title="" subTitle="USER DETAILS" />
+              <Box
+                width="100%"
+                gridColumn="span 12"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <FormControl fullWidth>
+                  <InputLabel id="demo-simple-select-label">Sub Merchant</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={subMerchant}
+                    label="Sub Merchant"
+                    onChange={handleSubMerchantChange}
+                    error={!!subMerchantError}
+                    helperText={subMerchantError}
+                  >
+                    <MenuItem value={1}>Merchant 2D</MenuItem>
+                    <MenuItem value={2}>Merchant 3D</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+              <Box
+                width="100%"
+                gridColumn="span 12"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <FormControl fullWidth>
+                  <InputLabel id="demo-simple-select-label">Gateway Method</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={gatewayMethod}
+                    label="Gateway Method"
+                    onChange={handleGatewayMethodChange}
+                    error={!!gatewayMethodError}
+                    helperText={gatewayMethodError}
+                  >
+                    <MenuItem value={1}>Bank 01</MenuItem>
+                    <MenuItem value={2}>Bank 02</MenuItem>
+                    <MenuItem value={3}>Bank 03</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+            </Box>          
+          </Box> */}
           <Box
-            display="grid"
-            gridTemplateColumns="repeat(12, 1fr)"
-            gridAutoRows="80px"
+            gridColumn="span 12"
+            gridRow="span 6"
+            backgroundColor={theme.palette.background.alt}
+            p="1rem"
+            borderRadius="0.55rem"
           >
+            <Header title="" subTitle="USER DETAILS" />
             <Box
-              width="100%"
-              gridColumn="span 6"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
+              display="grid"
+              gridTemplateColumns="repeat(12, 1fr)"
+              gridAutoRows="80px"
             >
-              <TextField
-                required
-                id="firstName"
-                label="First Name"
-                style={{width:"100%"}}
-                defaultValue=""
-                value={firstName}
-                onChange={handleFirstNameChange}
-                error={!!firstNameError}
-                helperText={firstNameError}
-              />
-            </Box>
-            <Box
-              width="100%"
-              gridColumn="span 6"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <TextField
-                required
-                id="lastName"
-                label="Last Name"
-                style={{width:"100%"}}
-                defaultValue=""
-                value={lastName}
-                onChange={handleLastNameChange}
-                error={!!lastNameError}
-                helperText={lastNameError}
-              />
-            </Box>
-            <Box
-              width="100%"
-              gridColumn="span 6"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <TextField
-                required
-                id="phone"
-                label="Phone"
-                style={{width:"100%"}}
-                defaultValue=""
-                value={phone}
-                onChange={handlePhoneChange}
-                error={!!phoneError}
-                helperText={phoneError}
-              />
-            </Box>
-            <Box
-              width="100%"
-              gridColumn="span 6"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <TextField
-                required
-                id="email"
-                label="Email"
-                style={{width:"100%"}}
-                defaultValue=""
-                value={email}
-                onChange={handleEmailChange}
-                error={!!emailError}
-                helperText={emailError}
-              />
-            </Box>
-            <Box
-              width="100%"
-              gridColumn="span 6"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <TextField
-                required
-                id="state"
-                label="State"
-                style={{width:"100%"}}
-                defaultValue=""
-                value={state}
-                onChange={handleStateChange}
-                error={!!stateError}
-                helperText={stateError}
-              />
-            </Box>
-            <Box
-              width="100%"
-              gridColumn="span 6"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <TextField
-                required
-                id="address"
-                label="Address"
-                style={{width:"100%"}}
-                defaultValue=""
-                value={address}
-                onChange={handleAddressChange}
-                error={!!addressError}
-                helperText={addressError}
-              />
-            </Box>
-            <Box
-              width="100%"
-              gridColumn="span 6"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <TextField
-                required
-                id="pincode"
-                label="Zip Code"
-                style={{width:"100%"}}
-                defaultValue=""
-                value={zipCode}
-                onChange={handleZipCodeChange}
-                error={!!zipCodeError}
-                helperText={zipCodeError}
-              />
-            </Box>
-            <Box
-              width="100%"
-              gridColumn="span 6"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <TextField
-                required
-                id="city"
-                label="City"
-                style={{width:"100%"}}
-                defaultValue=""
-                value={city}
-                onChange={handleCityChange}
-                error={!!cityError}
-                helperText={cityError}
-              />
-            </Box>
-            <Box
-              width="100%"
-              gridColumn="span 6"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <Autocomplete
-                id="country-select-demo"
-                sx={{ width: '100%' }}
-                options={countries}
-                autoHighlight
-                getOptionLabel={(option) => option.label}
-                renderOption={(props, option) => (
-                  <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
-                    <img
-                      loading="lazy"
-                      width="20"
-                      src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
-                      srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
-                      alt=""
-                    />
-                    {option.label} ({option.code}) +{option.phone}
-                  </Box>
-                )}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Country*"
-                    inputProps={{
-                      ...params.inputProps,
-                      autoComplete: 'new-password', // disable autocomplete and autofill
-                    }}                                        
-                    error={!!countryError}
-                    helperText={countryError}
-                  />
-                )}
-                value={country}
-                onChange={handleCountryChange}
-                error={!!countryError}
-                helperText={countryError}
-              />
-            </Box>
-            <Box
-              width="100%"
-              gridColumn="span 6"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <TextField
-                id="clientIP"
-                label="IP Address"
-                style={{width:"100%"}}
-                defaultValue=""
-                value={clientIP}
-                onChange={handleClientIPChange}
-                error={!!clientIPError}
-                helperText={clientIPError}
-              />
-            </Box>
-          </Box>          
-        </Box>
-        <Box
-          gridColumn="span 12"
-          gridRow="span 2"
-          backgroundColor={theme.palette.background.alt}
-          p="1rem"
-          borderRadius="0.55rem"
-        >
-          <Header title="" subTitle="TRANSACTION DETAILS" />
-          <Box
-            display="flex"
-            flexDirection="row"
-            justifyContent="space-around"
-          >
-            <Box
-              width="100%"
-              gridColumn="span 12"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <TextField
-                required
-                id="amount"
-                label="Amount"
-                style={{width:"100%"}}
-                defaultValue=""
-                value={amount}
-                onChange={handleAmountChange}
-                error={!!amountError}
-                helperText={amountError}
-              />
-            </Box>
-            <Box
-              width="100%"
-              gridColumn="span 12"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">Currency*</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={currency}
-                  label="Currency"
-                  onChange={handleCurrencyChange}
-                  error={!!currencyError}
-                  helperText={currencyError}
-                >
-                  <MenuItem value={'USD'}>USD</MenuItem>
-                  <MenuItem value={'EUR'}>EUR</MenuItem>
-                  <MenuItem value={'GBP'}>GBP</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>          
-        </Box>  
-        <Box
-          gridColumn="span 12"
-          gridRow="span 3"
-          backgroundColor={theme.palette.background.alt}
-          p="1rem"
-          borderRadius="0.55rem"
-        >
-          <Header title="" subTitle="CARD DETAILS" />
-          <Box
-            display="grid"
-            gridTemplateColumns="repeat(12, 1fr)"
-            gridAutoRows="80px"
-          >
-            <Box
-              width="100%"
-              gridColumn="span 6"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <TextField
-                required
-                id="cardNumber"
-                label="Card Number"
-                style={{width:"100%"}}
-                defaultValue=""
-                value={cardNumber}
-                onChange={handleCardNumberChange}
-                error={!!cardNumberError}
-                helperText={cardNumberError}
-              />
-            </Box>
-            <Box
-              width="100%"
-              gridColumn="span 6"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <TextField
-                required
-                id="cardName"
-                label="Card Name"
-                style={{width:"100%"}}
-                defaultValue=""
-                value={cardName}
-                onChange={handleCardNameChange}
-                error={!!cardNameError}
-                helperText={cardNameError}
-              />
-            </Box>
-            <Box
-              width="100%"
-              gridColumn="span 3"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">Card Type*</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={cardType}
-                  label="Card Type"
-                  onChange={handleCardTypeChange}
-                  error={!!cardTypeError}
-                  helperText={cardTypeError}
-                >
-                  <MenuItem value={'VISA'}>VISA</MenuItem>
-                  <MenuItem value={'MASTERCARD'}>MASTERCARD</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-            <Box
-              width="100%"
-              gridColumn="span 3"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
-            >
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker 
-                  id="cardExpDate" 
-                  label={'Card Expire Date*'} 
-                  views={['month', 'year']}
-                  format="MM/YYYY"
-                  value={cardExpDate}
-                  onChange={handleCardExpDateChange}
-                  error={!!cardExpDateError}
-                  helperText={cardExpDateError} 
+              <Box
+                width="100%"
+                gridColumn="span 6"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <TextField
+                  required
+                  id="firstName"
+                  label="First Name"
+                  style={{width:"100%"}}
+                  defaultValue=""
+                  value={firstName}
+                  onChange={handleFirstNameChange}
+                  error={!!firstNameError}
+                  helperText={firstNameError}
+                />
+              </Box>
+              <Box
+                width="100%"
+                gridColumn="span 6"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <TextField
+                  required
+                  id="lastName"
+                  label="Last Name"
+                  style={{width:"100%"}}
+                  defaultValue=""
+                  value={lastName}
+                  onChange={handleLastNameChange}
+                  error={!!lastNameError}
+                  helperText={lastNameError}
+                />
+              </Box>
+              <Box
+                width="100%"
+                gridColumn="span 6"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <TextField
+                  required
+                  id="phone"
+                  label="Phone"
+                  style={{width:"100%"}}
+                  defaultValue=""
+                  value={phone}
+                  onChange={handlePhoneChange}
+                  error={!!phoneError}
+                  helperText={phoneError}
+                />
+              </Box>
+              <Box
+                width="100%"
+                gridColumn="span 6"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <TextField
+                  required
+                  id="email"
+                  label="Email"
+                  style={{width:"100%"}}
+                  defaultValue=""
+                  value={email}
+                  onChange={handleEmailChange}
+                  error={!!emailError}
+                  helperText={emailError}
+                />
+              </Box>
+              <Box
+                width="100%"
+                gridColumn="span 6"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <TextField
+                  required
+                  id="state"
+                  label="State"
+                  style={{width:"100%"}}
+                  defaultValue=""
+                  value={state}
+                  onChange={handleStateChange}
+                  error={!!stateError}
+                  helperText={stateError}
+                />
+              </Box>
+              <Box
+                width="100%"
+                gridColumn="span 6"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <TextField
+                  required
+                  id="address"
+                  label="Address"
+                  style={{width:"100%"}}
+                  defaultValue=""
+                  value={address}
+                  onChange={handleAddressChange}
+                  error={!!addressError}
+                  helperText={addressError}
+                />
+              </Box>
+              <Box
+                width="100%"
+                gridColumn="span 6"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <TextField
+                  required
+                  id="pincode"
+                  label="Zip Code"
+                  style={{width:"100%"}}
+                  defaultValue=""
+                  value={zipCode}
+                  onChange={handleZipCodeChange}
+                  error={!!zipCodeError}
+                  helperText={zipCodeError}
+                />
+              </Box>
+              <Box
+                width="100%"
+                gridColumn="span 6"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <TextField
+                  required
+                  id="city"
+                  label="City"
+                  style={{width:"100%"}}
+                  defaultValue=""
+                  value={city}
+                  onChange={handleCityChange}
+                  error={!!cityError}
+                  helperText={cityError}
+                />
+              </Box>
+              <Box
+                width="100%"
+                gridColumn="span 6"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <Autocomplete
+                  id="country-select-demo"
+                  sx={{ width: '100%' }}
+                  options={countries}
+                  autoHighlight
+                  getOptionLabel={(option) => option.label}
+                  renderOption={(props, option) => (
+                    <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
+                      <img
+                        loading="lazy"
+                        width="20"
+                        src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
+                        srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
+                        alt=""
+                      />
+                      {option.label} ({option.code}) +{option.phone}
+                    </Box>
+                  )}
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      error={!!cardExpDateError}
-                      helperText={cardExpDateError} 
+                      label="Country*"
+                      inputProps={{
+                        ...params.inputProps,
+                        autoComplete: 'new-password', // disable autocomplete and autofill
+                      }}                                        
+                      error={!!countryError}
+                      helperText={countryError}
                     />
                   )}
-                  
+                  // defaultValue={countries.find((country) => country.code === 'US')}
+                  value={country}
+                  onChange={handleCountryChange}
+                  error={!!countryError}
+                  helperText={countryError}
                 />
-              </LocalizationProvider>              
-            </Box>
+              </Box>
+              <Box
+                width="100%"
+                gridColumn="span 6"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <TextField
+                  id="clientIP"
+                  label="IP Address"
+                  style={{width:"100%"}}
+                  defaultValue=""
+                  value={clientIP}
+                  onChange={handleClientIPChange}
+                  error={!!clientIPError}
+                  helperText={clientIPError}
+                />
+              </Box>
+            </Box>          
+          </Box>
+          <Box
+            gridColumn="span 12"
+            gridRow="span 2"
+            backgroundColor={theme.palette.background.alt}
+            p="1rem"
+            borderRadius="0.55rem"
+          >
+            <Header title="" subTitle="TRANSACTION DETAILS" />
             <Box
-              width="100%"
-              gridColumn="span 6"
-              gridRow="span 1"
-              // backgroundColor={theme.palette.background.alt}
-              p="1rem"
+              display="flex"
+              flexDirection="row"
+              justifyContent="space-around"
             >
-              <TextField
-                required
-                id="cardCVV"
-                label="Cvv Code"
-                style={{width:"100%"}}
-                defaultValue=""
-                value={cardCVV}
-                onChange={handleCardCVVChange}
-                error={!!cardCVVError}
-                helperText={cardCVVError}
-              />
-            </Box> 
-          </Box>        
-        </Box> 
-        <Button id="submit" variant="contained" onClick={handleSubmit}>Submit</Button>       
-      </Box>
+              <Box
+                width="100%"
+                gridColumn="span 12"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <TextField
+                  required
+                  id="amount"
+                  label="Amount"
+                  style={{width:"100%"}}
+                  defaultValue=""
+                  value={amount}
+                  onChange={handleAmountChange}
+                  error={!!amountError}
+                  helperText={amountError}
+                />
+              </Box>
+              <Box
+                width="100%"
+                gridColumn="span 12"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <FormControl fullWidth>
+                  <InputLabel id="demo-simple-select-label">Currency*</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    // defaultValue={'USD'}
+                    value={currency}
+                    label="Currency"
+                    onChange={handleCurrencyChange}
+                    error={!!currencyError}
+                    helperText={currencyError}
+                  >
+                    <MenuItem value={'USD'}>USD</MenuItem>
+                    <MenuItem value={'EUR'}>EUR</MenuItem>
+                    <MenuItem value={'GBP'}>GBP</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+            </Box>          
+          </Box>  
+          <Box
+            gridColumn="span 12"
+            gridRow="span 2"
+            backgroundColor={theme.palette.background.alt}
+            p="1rem"
+            borderRadius="0.55rem"
+          >
+            <Header title="" subTitle="CARD DETAILS" />
+            <Box
+              display="grid"
+              gridTemplateColumns="repeat(12, 1fr)"
+              gridAutoRows="80px"
+            >
+              <Box
+                width="100%"
+                gridColumn="span 6"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <TextField
+                  required
+                  id="cardNumber"
+                  label="Card Number"
+                  style={{width:"100%"}}
+                  defaultValue=""
+                  value={cardNumber}
+                  onChange={handleCardNumberChange}
+                  inputProps={{
+                    maxLength: 19,
+                  }}
+                  error={!!cardNumberError}
+                  helperText={cardNumberError}
+                />
+              </Box>
+              {/* <Box
+                width="100%"
+                gridColumn="span 6"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <TextField
+                  required
+                  id="cardName"
+                  label="Card Name"
+                  style={{width:"100%"}}
+                  defaultValue=""
+                  value={cardName}
+                  onChange={handleCardNameChange}
+                  error={!!cardNameError}
+                  helperText={cardNameError}
+                />
+              </Box>
+              <Box
+                width="100%"
+                gridColumn="span 3"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <FormControl fullWidth>
+                  <InputLabel id="demo-simple-select-label">Card Type*</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={cardType}
+                    label="Card Type"
+                    onChange={handleCardTypeChange}
+                    error={!!cardTypeError}
+                    helperText={cardTypeError}
+                  >
+                    <MenuItem value={'VISA'}>VISA</MenuItem>
+                    <MenuItem value={'MASTERCARD'}>MASTERCARD</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box> */}
+              <Box
+                width="100%"
+                gridColumn="span 3"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker 
+                    id="cardExpDate" 
+                    label={'Card Expire Date*'} 
+                    views={['month', 'year']}
+                    format="MM/YYYY"
+                    value={cardExpDate}
+                    onChange={handleCardExpDateChange}
+                    error={!!cardExpDateError}
+                    helperText={cardExpDateError} 
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        error={!!cardExpDateError}
+                        helperText={cardExpDateError} 
+                      />
+                    )}
+                    
+                  />
+                </LocalizationProvider>              
+              </Box>
+              <Box
+                width="100%"
+                gridColumn="span 3"
+                gridRow="span 1"
+                // backgroundColor={theme.palette.background.alt}
+                p="1rem"
+              >
+                <TextField
+                  required
+                  id="cardCVV"
+                  label="Cvv Code"
+                  style={{width:"100%"}}
+                  defaultValue=""
+                  value={cardCVV}
+                  onChange={handleCardCVVChange}
+                  error={!!cardCVVError}
+                  helperText={cardCVVError}
+                />
+              </Box> 
+            </Box>        
+          </Box> 
+          <Button id="submit" variant="contained" onClick={handleSubmit}>Submit</Button>       
+        </Box>
+      }
     </Box>
   );
 };

@@ -105,7 +105,7 @@ export const transactionTableColumns = [
   {
     field: "merchantId",
     headerName: "Merchant ID",
-    flex: 0.5,
+    flex: 0.7,
   },
   {
     field: "transactionId",
@@ -123,12 +123,12 @@ export const transactionTableColumns = [
   },
   {
     field: "transactionType",
-    headerName: "Transaction Type",
+    headerName: "Type",
     flex: 0.5,
   },
   {
     field: "paymentMethod",
-    headerName: "Payment Method",
+    headerName: "Solution",
     flex: 0.5,
   },
   {
@@ -137,7 +137,7 @@ export const transactionTableColumns = [
     flex: 1,
   },
   {
-    field: "card",
+    field: "cardNumber",
     headerName: "Card Number",
     flex: 1,
   },
@@ -146,11 +146,11 @@ export const transactionTableColumns = [
   //   headerName: "Card Type",
   //   flex: 0.5,
   // },
-  {
-    field: "country",
-    headerName: "Country",
-    flex: 1,
-  },
+  // {
+  //   field: "country",
+  //   headerName: "Country",
+  //   flex: 1,
+  // },
   {
     field: "amount",
     headerName: "Amount",
@@ -181,16 +181,17 @@ export const transactionTableColumns = [
     headerName: "Status Date",
     flex: 1,
   },
-  // { 
-  //   field: 'action',
-  //   headerName: 'Action',
-  //   sortable: false,
-  //   flex: 1,
-  //   renderCell: (params) => (
-  //     <Button id="submit" variant="contained" onClick={() => handleRefundRow(params.row)}>Refund</Button>
-  //     // <button onClick={() => handleRefundRow(params.row)}>Refund</button>
-  //   )
-  // },
+  { 
+    field: 'action',
+    headerName: 'Action',
+    sortable: false,
+    flex: 1,
+    renderCell: (params) => (
+      // <Button id="submit" variant="contained" onClick={() => handleRefundRow(params.row)}>Refund</Button>
+      <Button id="delete" variant="contained" onClick={() => handleDeleteRow(params.row)}>Delete</Button>
+      // <button onClick={() => handleRefundRow(params.row)}>Refund</button>
+    )
+  },
   // {
   //   field: "products",
   //   headerName: "# of Products",
