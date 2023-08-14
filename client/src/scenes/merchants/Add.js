@@ -226,7 +226,8 @@ const Add = ({ setIsAdding }) => {
                 error={!!typeError}
                 helperText={typeError}
               >
-                <MenuItem value={'2D'}>2D</MenuItem>
+                <MenuItem value={'2D (APM)'}>2D (APM)</MenuItem>
+                <MenuItem value={'2D (APM2)'}>2D (APM2)</MenuItem>
                 <MenuItem value={'3D'}>3D</MenuItem>
                 <MenuItem value={'HPP'}>HPP</MenuItem>
               </Select>

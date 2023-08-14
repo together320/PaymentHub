@@ -129,10 +129,15 @@ export const process_hpp = async (req, res) => {
   }
 };
 
-// test
+//////////////// MPS ////////////////////////
 const MPS_URL = 'https://processing.merchantpayservices.com/api/v1.1';
-const MPS_KEY = '64b96bea2e6bd';
-const MPS_SECRET = '89b59d5ca29be2e764273a978c8d3ec9';
+// APM
+const MPS_KEY = '645aa724d2c5a';
+const MPS_SECRET = '9c9e6a6b671dc77aedd9006064e72829';
+// APM2
+const MPS_KEY2 = '64b96bea2e6bd';
+const MPS_SECRET2 = '89b59d5ca29be2e764273a978c8d3ec9';
+/////////////////////////////////////////////
 
 export const process_2d = async (req, res) => {
   const apiKey = req.headers['x-api-key'];
@@ -147,15 +152,23 @@ export const process_2d = async (req, res) => {
       })
     }
 
-    if (merchant.type !== "2D") {
+    let mps_key = "";
+    let mps_secret = "";
+    if (merchant.type === "2D (APM)") {
+      mps_key = MPS_KEY;
+      mps_secret = MPS_SECRET;
+    } else if (merchant.type === "2D (APM2)") {
+      mps_key = MPS_KEY2;
+      mps_secret = MPS_SECRET2;
+    } else {
       return res.status(200).json({
         error: "This merchant is not allowed 2D transactions"
-      })
+      });
     }
 
     const config = {
       headers: {
-        'Authorization': `${MPS_KEY}:${MPS_SECRET}`,
+        'Authorization': `${mps_key}:${mps_secret}`,
         'Content-Type': 'application/json'
       },
     };
@@ -171,7 +184,7 @@ export const process_2d = async (req, res) => {
       billing_city: data.city,
       billing_state: data.state,
       billing_country: data.country,
-      billing_zip: data.zipcode,
+      billing_zip: data.zipCode,
       order_id: trxId,
       order_description: data.orderDetail,
       description: data.orderDetail,
@@ -187,7 +200,7 @@ export const process_2d = async (req, res) => {
     const newTransaction = await Transaction.create({
       merchantId: data.mid,
       transactionId: trxId,
-      transactionType: '2D',
+      transactionType: merchant.type,
       paymentMethod: 'MPS',
       firstName: data.firstName,
       lastName: data.lastName,
@@ -198,7 +211,7 @@ export const process_2d = async (req, res) => {
       city: data.city,
       state: data.state,
       country: data.country,
-      zipCode: data.zipcode,
+      zipCode: data.zipCode,
       clientIp: data.clientIp,
       amount: data.amount,
       currency: data.currency,

@@ -28,8 +28,8 @@ const UserSchema = new mongoose.Schema(
     // transactions: Array,
     type: {
       type: String,
-      enum: ["2D", "3D", "HPP"],
-      default: "2D",
+      enum: ["2D (APM)", "2D (APM2)", "3D", "HPP"],
+      default: "HPP",
     },
     currency: {
       type: String,
