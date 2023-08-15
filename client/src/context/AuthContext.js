@@ -20,7 +20,7 @@ class AuthProvider extends React.PureComponent {
 
       const decoded = jwt(tken); 
 
-      if (Date.now() / 1000 > decoded.exp - 5) {
+      if (Date.now() / 1000 > decoded.exp) {
         localStorage.clear();
         toast.error('Session has expired, please re-login');
         return false

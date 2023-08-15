@@ -8,6 +8,7 @@ import DataGridCustomToolbar from 'components/DataGridCustomToolbar';
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate  } from "react-router-dom";
 import Swal from 'sweetalert2';
+import { ConstructionOutlined } from "@mui/icons-material";
 
 const Transactions = () => {
   const theme = useTheme();
@@ -23,6 +24,12 @@ const Transactions = () => {
   const authUser = getAuthUser();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (authUser === null) {
+      navigate('/login');
+    }
+  }, [authUser])
+// console.log('user', authUser);
   const transactionTableColumns = [
     {
       field: "merchantId",
@@ -105,7 +112,7 @@ const Transactions = () => {
     },
   ];
 
-  if (authUser.role === "admin" || authUser.role === "superadmin") {
+  if (authUser?.role === "admin" || authUser?.role === "superadmin") {
     transactionTableColumns.push(
       { 
         field: 'action',
@@ -136,13 +143,6 @@ const Transactions = () => {
     );
   }
   
-  
-  useEffect(() => {
-    if (authUser === null) {
-      navigate('/login');
-    }
-  }, [authUser])
-
   const { data, isLoading, refetch } = useGetTransactionsQuery({
     id: authUser, 
     page,
