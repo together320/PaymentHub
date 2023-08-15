@@ -71,7 +71,7 @@ export const process_hpp = async (req, res) => {
       client_pwd: TRANSXND_PWD,
       orderId: trxId,
       amount: data.amount,
-      description: data.orderDetail,
+      description: "Trans_Pay", // data.orderDetail,
       idempotence_key: refId,
       currency: data.currency
     }

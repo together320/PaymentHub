@@ -142,14 +142,14 @@ export const getDashboardStats = async (req, res) => {
       criteria = {         
         createdAt: {
           $gte: _startDate,
-          $lt: _endDate
+          $lte: _endDate
         },          
       };
     } else {
       criteria = {
         createdAt: {
           $gte: _startDate,
-          $lt: _endDate
+          $lte: _endDate
         },
         merchantId: user.name,
       };
@@ -222,14 +222,14 @@ export const getChartStats = async (req, res) => {
       criteria = {         
         createdAt: {
           $gte: _startDate,
-          $lt: _endDate
+          $lte: _endDate
         },          
       };
     } else {
       criteria = {
         createdAt: {
           $gte: _startDate,
-          $lt: _endDate
+          $lte: _endDate
         },
         merchantId: user.name,
       };
@@ -337,14 +337,14 @@ export const getPieStats = async (req, res) => {
       criteria = {         
         createdAt: {
           $gte: _startDate,
-          $lt: _endDate
+          $lte: _endDate
         },          
       };
     } else {
       criteria = {
         createdAt: {
           $gte: _startDate,
-          $lt: _endDate
+          $lte: _endDate
         },
         merchantId: user.name,
       };
