@@ -22,11 +22,11 @@ const BreakdownChart = ({ isDashboard = false, name, startDate, endDate }) => {
   if (!data) return "Loading...";
 
   const colors = [
-    theme.palette.secondary[500],
-    theme.palette.secondary[400],
-    theme.palette.secondary[300],
-    theme.palette.secondary[200],
-    theme.palette.secondary[100],
+    "green", // theme.palette.secondary[500],
+    "red", // theme.palette.secondary[400],
+    "gray", // theme.palette.secondary[300],
+    "yellow", // theme.palette.secondary[200],
+    "pink", // theme.palette.secondary[100],
   ];
   const formattedData = [
     {
@@ -80,7 +80,7 @@ const BreakdownChart = ({ isDashboard = false, name, startDate, endDate }) => {
             },
             legend: {
               text: {
-                fill: theme.palette.secondary[200],
+                fill: theme.palette.secondary[100],
               },
             },
             ticks: {
@@ -89,18 +89,18 @@ const BreakdownChart = ({ isDashboard = false, name, startDate, endDate }) => {
                 strokeWidth: 1,
               },
               text: {
-                fill: theme.palette.secondary[200],
+                fill: theme.palette.secondary[100],
               },
             },
           },
           legends: {
             text: {
-              fill: theme.palette.secondary[200],
+              fill: theme.palette.secondary[100],
             },
           },
           tooltip: {
             container: {
-              color: theme.palette.primary.main,
+              color: theme.palette.primary[300],
             },
           },
         }}
@@ -119,7 +119,7 @@ const BreakdownChart = ({ isDashboard = false, name, startDate, endDate }) => {
           modifiers: [["darker", 0.2]],
         }}
         enableArcLinkLabels={!isDashboard}
-        arcLinkLabelsTextColor={theme.palette.secondary[200]}
+        arcLinkLabelsTextColor={theme.palette.secondary[100]}
         arcLinkLabelsThickness={2}
         arcLinkLabelsColor={{ from: "color" }}
         arcLabelsSkipAngle={10}
@@ -146,7 +146,7 @@ const BreakdownChart = ({ isDashboard = false, name, startDate, endDate }) => {
               {
                 on: "hover",
                 style: {
-                  itemTextColor: theme.palette.primary[500],
+                  itemTextColor: theme.palette.primary[100],
                 },
               },
             ],
@@ -157,7 +157,7 @@ const BreakdownChart = ({ isDashboard = false, name, startDate, endDate }) => {
         position="absolute"
         top="50%"
         left="50%"
-        color={theme.palette.secondary[400]}
+        color={theme.palette.secondary[100]}
         textAlign="center"
         pointerEvents="none"
         sx={{
