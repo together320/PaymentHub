@@ -144,6 +144,7 @@ const Transactions = () => {
   }, [authUser])
 
   const { data, isLoading, refetch } = useGetTransactionsQuery({
+    id: authUser, 
     page,
     pageSize,
     sort: JSON.stringify(sort),

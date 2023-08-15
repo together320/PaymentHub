@@ -40,9 +40,9 @@ export const fetchMerchants = async (req, res) => {
 export const fetchTransactions = async (req, res) => {
   try {
     // sort should look like this: { "field": "userId", "sort": "desc"}
-    const { page = 1, pageSize = 20, sort = "[]", search = "" } = req.query;
+    const { id, page = 1, pageSize = 20, sort = "[]", search = "" } = req.query;
     console.log('fetch transactions req', req.query);
-
+    const user = JSON.parse(id);
     // formatted sort should look like { userId: -1 }
     const generateSort = () => {
       let sortParsed = JSON.parse(sort);
@@ -62,18 +62,31 @@ export const fetchTransactions = async (req, res) => {
     const sortFormatted = Boolean(sort) ? generateSort() : {};
     console.log('sort format for trxn', sortFormatted);
 
-    const transactions = await Transaction.find({
-      $or: [
-        { status: { $regex: new RegExp(search, "i") } },
-      ],
-    })
+    let criteria = {};
+    if (user.role === "merchant") {
+      criteria = {
+        $and: [
+          { merchantId: user.name },
+          {
+            $or: [
+              { status: { $regex: new RegExp(search, "i") } }
+            ]
+          }
+        ]
+      };
+    } else {
+      criteria = {
+        $or: [
+          { status: { $regex: new RegExp(search, "i") } }
+        ]
+      };
+    }
+    const transactions = await Transaction.find(criteria)
       .sort(sortFormatted)
       .skip(page * pageSize)
       .limit(pageSize);
 
-    const total = await Transaction.countDocuments({
-      name: { $regex: search, $options: "i" },
-    });
+    const total = await Transaction.countDocuments(criteria);
 
     res.status(200).json({
       transactions,

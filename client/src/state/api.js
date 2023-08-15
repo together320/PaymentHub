@@ -37,10 +37,10 @@ export const api = createApi({
       providesTags: ["Merchants"],
     }),
     getTransactions: build.query({
-      query: ({ page, pageSize, sort, search }) => ({
+      query: ({ id, page, pageSize, sort, search }) => ({
         url: `client/transactions`,
         method: "GET",
-        params: { page, pageSize, sort, search },
+        params: { id: JSON.stringify(id), page, pageSize, sort, search },
       }),
       tagTypes: ["Transactions"],
     }),

@@ -902,14 +902,6 @@ const Transactions = () => {
     setCardCVV(event.target.value);
   };
 
-  const { data, isLoading } = useGetTransactionsQuery({
-    page,
-    pageSize,
-    sort: JSON.stringify(sort),
-    search,
-  });
-  // console.log(data, sort, search);
-
   useEffect(() => {
     if (authUser === null) {
       navigate('/login');
