@@ -1,4 +1,5 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
+import { useNavigate  } from "react-router-dom";
 import { Box, useMediaQuery } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -14,8 +15,17 @@ const Layout = () => {
   
   // const { data } = useGetUserQuery(userId);
   
-  const { getAuthUser} = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { getAuthUser, isAuthenticated } = useContext(AuthContext);
   const authUser = getAuthUser();
+  const _isAuthenticated = isAuthenticated();
+  console.log('isAuthenticated', _isAuthenticated);
+
+  useEffect(() => {
+    if (authUser === null || !_isAuthenticated) {
+      navigate('/login');
+    }
+  }, [authUser, _isAuthenticated])
 
   // console.log(data);
 

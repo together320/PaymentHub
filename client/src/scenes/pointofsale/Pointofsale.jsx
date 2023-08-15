@@ -1,4 +1,5 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
+import { useNavigate  } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { DataGrid } from "@mui/x-data-grid";
 import { useGetTransactionsQuery, paymentApi } from "state/api";
@@ -24,6 +25,7 @@ const Transactions = () => {
   
   const { getAuthUser} = useContext(AuthContext);
   const authUser = getAuthUser();
+  const navigate = useNavigate();
 
   const countries = [
     { code: 'AD', label: 'Andorra', phone: '376' },
@@ -907,6 +909,12 @@ const Transactions = () => {
     search,
   });
   // console.log(data, sort, search);
+
+  useEffect(() => {
+    if (authUser === null) {
+      navigate('/login');
+    }
+  }, [authUser])
 
   return (
     <Box m="1.5rem 2.5rem" pb="1.5rem">

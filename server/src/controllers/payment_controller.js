@@ -318,10 +318,18 @@ export const callback_transxnd_hpp = async (req, res) => {
 			res.redirect(transaction.redirectUrl);
 		}
 
-    if (data['hash'] !== transaction.hash || data['status'] !== 'success' || !data['transaction_id']) {
-      status = "cancelled";
+    if (data['hash'] !== transaction.hash || !data['transaction_id']) {
+      status = "error";
     } else {
-      status = "approved";
+      if (data['status'] === 'success')
+        status = "approved";
+      else if (data['status'] === 'cancelled')
+        status = "cancelled"
+      else if (data['status'] === 'failed')
+        status = "error"
+      else if (data['status'] === 'previously_completed') {
+        return res.redirect(transaction.redirectUrl);
+      }
     }
     transaction.status = status;
     transaction.response = JSON.stringify(data);

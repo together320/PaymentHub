@@ -368,6 +368,7 @@ export const getPieStats = async (req, res) => {
           declinedAmount: { $sum: { $cond: [{ $eq: ["$status", "declined"] }, "$amountDouble", 0] } },
           cancelledAmount: { $sum: { $cond: [{ $eq: ["$status", "cancelled"] }, "$amountDouble", 0] } },
           pendingAmount: { $sum: { $cond: [{ $eq: ["$status", "pending"] }, "$amountDouble", 0] } },
+          errorAmount: { $sum: { $cond: [{ $eq: ["$status", "error"] }, "$amountDouble", 0] } },
         }
       }
     ]);
@@ -378,6 +379,7 @@ export const getPieStats = async (req, res) => {
       declinedAmount: 0,
       cancelledAmount: 0,
       pendingAmount: 0,
+      errorAmount: 0,
     };
     if (transactions.length > 0) {
       // console.log('dddd', transactions);
@@ -386,6 +388,7 @@ export const getPieStats = async (req, res) => {
       result.declinedAmount = transactions[0].declinedAmount;
       result.cancelledAmount = transactions[0].cancelledAmount;
       result.pendingAmount = transactions[0].pendingAmount;
+      result.errorAmount = transactions[0].errorAmount;
     }
 
     res.status(200).json(result);

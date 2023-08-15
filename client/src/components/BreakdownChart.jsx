@@ -23,9 +23,10 @@ const BreakdownChart = ({ isDashboard = false, name, startDate, endDate }) => {
 
   const colors = [
     theme.palette.secondary[500],
+    theme.palette.secondary[400],
     theme.palette.secondary[300],
-    theme.palette.secondary[300],
-    theme.palette.secondary[500],
+    theme.palette.secondary[200],
+    theme.palette.secondary[100],
   ];
   const formattedData = [
     {
@@ -51,6 +52,12 @@ const BreakdownChart = ({ isDashboard = false, name, startDate, endDate }) => {
       label: 'Pending',
       value: data.pendingAmount,
       color: colors[3],
+    },
+    {
+      id: 'error',
+      label: 'Error',
+      value: data.errorAmount,
+      color: colors[4],
     },
   ];
 
