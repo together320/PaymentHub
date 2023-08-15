@@ -22,7 +22,7 @@ const Layout = () => {
   console.log('isAuthenticated', _isAuthenticated);
 
   useEffect(() => {
-    if (authUser === null || !_isAuthenticated) {
+    if (authUser === null) { // || !_isAuthenticated
       navigate('/login');
     }
   }, [authUser, _isAuthenticated])

@@ -7,16 +7,16 @@ import { v4 as uuidv4 } from 'uuid';
 const SERVER_URL = 'https://paymenthub.uk/api';
 
 // live
-// const TRANSXND_URL = 'https://pay.transxnd.com/api';
-// const TRANSXND_ID = "Payhub";
-// const TRANSXND_PWD = "Payhub";
-// const TRANSXND_KEY = "91e03e8147911f8d9a380af0065529a64bc40218c526c0c372e4c2c7a209f3d99630b316c244fbf5388a86aae160a64cbc3e0db13348a96c203dfb1ce2ce7edf";
+const TRANSXND_URL = 'https://pay.transxnd.com/api';
+const TRANSXND_ID = "Payhub";
+const TRANSXND_PWD = "Payhub";
+const TRANSXND_KEY = "91e03e8147911f8d9a380af0065529a64bc40218c526c0c372e4c2c7a209f3d99630b316c244fbf5388a86aae160a64cbc3e0db13348a96c203dfb1ce2ce7edf";
 
 // sandbox
-const TRANSXND_URL = 'https://devpg.transxnd.com/api';
-const TRANSXND_ID = "payhub";
-const TRANSXND_PWD = "payhub";
-const TRANSXND_KEY = "78996876853450bf2808efd88f8a1d656a39f043bae25abd6c2c99f2b938b057cb1946f63693b80afba81161fa3c75ef04943a2733ca3dd85b52295caf47b9a8";
+// const TRANSXND_URL = 'https://devpg.transxnd.com/api';
+// const TRANSXND_ID = "payhub";
+// const TRANSXND_PWD = "payhub";
+// const TRANSXND_KEY = "78996876853450bf2808efd88f8a1d656a39f043bae25abd6c2c99f2b938b057cb1946f63693b80afba81161fa3c75ef04943a2733ca3dd85b52295caf47b9a8";
 
 // PRODUCTION
 // "client_id": "Payhub",
