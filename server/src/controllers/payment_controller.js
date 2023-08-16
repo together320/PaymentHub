@@ -194,7 +194,7 @@ export const process_2d = async (req, res) => {
       card_cvv: data.cardCVV,
       expiry_month: data.cardExpMonth,
       expiry_year: data.cardExpYear,
-      endpoint: SERVER_URL + '/payment/callback_mps'
+      endpoint: SERVER_URL + '/payment/callbackMps'
     };
 
     const newTransaction = await Transaction.create({
