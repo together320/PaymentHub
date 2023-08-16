@@ -41,12 +41,12 @@ export const fetchTransactions = async (req, res) => {
   try {
     // sort should look like this: { "field": "userId", "sort": "desc"}
     const { id, page = 1, pageSize = 20, sort = "[]", search = "" } = req.query;
-    console.log('fetch transactions req', req.query);
+    // console.log('fetch transactions req', req.query);
     const user = JSON.parse(id);
     // formatted sort should look like { userId: -1 }
     const generateSort = () => {
       let sortParsed = JSON.parse(sort);
-      console.log('sortParsed', sortParsed);
+      // console.log('sortParsed', sortParsed);
 
       if (sortParsed.length > 0)
         sortParsed = sortParsed[0];
@@ -60,7 +60,7 @@ export const fetchTransactions = async (req, res) => {
       return sortFormatted;
     };
     const sortFormatted = Boolean(sort) ? generateSort() : {};
-    console.log('sort format for trxn', sortFormatted);
+    // console.log('sort format for trxn', sortFormatted);
 
     let criteria = {};
     if (user.role === "merchant") {
