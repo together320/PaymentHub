@@ -688,7 +688,7 @@ const Transactions = () => {
       !cityError &&
       country !== null &&
       !countryError &&
-      // clientIP &&
+      clientIP &&
       !clientIPError &&
       amount &&
       !amountError &&
@@ -1205,6 +1205,7 @@ const Transactions = () => {
                 p="1rem"
               >
                 <TextField
+                  required
                   id="clientIP"
                   label="IP Address"
                   style={{width:"100%"}}

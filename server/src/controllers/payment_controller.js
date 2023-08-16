@@ -238,10 +238,20 @@ export const process_2d = async (req, res) => {
       console.log('mps-pay-res', resp.data);
 
       if (resp.data.message) {
+        newTransaction.status = "error";
+        newTransaction.response = JSON.stringify(resp.data);
+        newTransaction.statusDate = new Date();
+        newTransaction.paymentId = resp.transaction_id?resp.transaction_id:'';
+        await newTransaction.save();
         return res.status(200).json({error: resp.data.message});
       }
 
       if (resp.data.error) {
+        newTransaction.status = "error";
+        newTransaction.response = JSON.stringify(resp.data);
+        newTransaction.statusDate = new Date();
+        newTransaction.paymentId = resp.transaction_id?resp.transaction_id:'';
+        await newTransaction.save();
         return res.status(200).json({error: resp.data.error});
       }
 
@@ -391,7 +401,7 @@ export const callback_mps = async (req, res) => {
 			transactionId: txId,
 		});
 		if (!transaction || transaction.status !== 'pending') {
-			res.status(200).json({success: false, message: 'There is no transaction to process.'});  
+			return res.status(200).json({success: false, message: 'There is no transaction to process.'});  
 		}
 		
 		let status = 'pending';
@@ -400,7 +410,7 @@ export const callback_mps = async (req, res) => {
 		});
 
 		if (!merchant) {
-			res.status(200).json({success: false, message: 'There is no customer with this transaction.'});  
+			return res.status(200).json({success: false, message: 'There is no customer with this transaction.'});  
 		}
 
     if (data.status = 'success') {
@@ -444,13 +454,13 @@ export const callback_mps = async (req, res) => {
       }
     )
     .then(async (resp) => {
-      console.log(resp.data);
+      console.log('callback-mps-callback-to-mechant-resp', resp.data);
       if (resp.status !== 200) {
         console.log('Should resend the callback to ', transaction.callbackUrl, payload);
       }
     })
     .catch((e) => {
-      console.log(e);
+      console.log('callback-mps-callback-to-mechant-resp-error', e.message);
     });
     
     res.status(200).json({success: true, message: 'Transaction has been processed.'});  
