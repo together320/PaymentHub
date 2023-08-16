@@ -298,7 +298,7 @@ export const process_3d = async (req, res) => {
 
 export const callback_transxnd_hpp = async (req, res) => {
   console.log('---callback_transxnd_hpp---');
-	console.log(req.query);
+	console.log('req.query', req.query);
 	const data = req.query;
 	const txId = data.orderId;
 	try {
@@ -306,7 +306,7 @@ export const callback_transxnd_hpp = async (req, res) => {
 			transactionId: txId,
 		});
 		if (!transaction || transaction.status !== 'pending') {
-			res.redirect(transaction.redirectUrl);
+			return res.redirect(transaction.redirectUrl);
 		}
 		
 		let status = 'pending';
@@ -315,7 +315,7 @@ export const callback_transxnd_hpp = async (req, res) => {
 		});
 
 		if (!merchant) {
-			res.redirect(transaction.redirectUrl);
+			return res.redirect(transaction.redirectUrl);
 		}
 
     if (data['status'] === 'cancelled') {
@@ -366,12 +366,12 @@ export const callback_transxnd_hpp = async (req, res) => {
       }
     )
     .then(async (resp) => {
-      console.log(resp.data);
+      console.log('callback-trnsxnd-hpp-callback-to-mechant-resp', resp.data);
     })
     .catch((e) => {
-      console.log(e);
+      console.log('callback-trnsxnd-hpp-callback-to-mechant-resp-error', e.message);
     });
-    res.redirect(transaction.redirectUrl);
+    return res.redirect(transaction.redirectUrl);
     
   } catch (e) {
     console.log('callback_transxnd_hpp_error', e.message);

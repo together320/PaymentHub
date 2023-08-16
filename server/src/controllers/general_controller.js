@@ -113,11 +113,11 @@ export const fetchUser = async (req, res) => {
   try {
     const id = req.params.id;
 
-    console.log('iiiddd', id);
+    // console.log('iiiddd', id);
 
     const result = await User.findById(id);
 
-    console.log('user-result', result);
+    // console.log('user-result', result);
 
     res.status(200).json(result);
   } catch (e) {
@@ -128,14 +128,14 @@ export const fetchUser = async (req, res) => {
 export const getDashboardStats = async (req, res) => {
   try {
     
-    console.log('req.params', req.query.id);
+    // console.log('req.params', req.query.id);
     const {id, startDate, endDate} = req.query;
     const user = JSON.parse(id);
     const _startDate = new Date(startDate);
     let _endDate = new Date(endDate);
 
     _endDate.setDate(_endDate.getDate() + 1);
-    console.log('dateee', _startDate, _endDate);
+    // console.log('dateee', _startDate, _endDate);
 
     let criteria = {}
     if (user.role === 'admin' || user.role === 'superadmin') {
