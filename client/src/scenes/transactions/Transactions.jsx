@@ -9,6 +9,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { useNavigate  } from "react-router-dom";
 import Swal from 'sweetalert2';
 import { ConstructionOutlined } from "@mui/icons-material";
+import Detail from './Detail';
 
 const Transactions = () => {
   const theme = useTheme();
@@ -19,6 +20,8 @@ const Transactions = () => {
   const [sort, setSort] = useState({});
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [isDetail, setIsDetail] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
 
   const { getAuthUser} = useContext(AuthContext);
   const authUser = getAuthUser();
@@ -151,14 +154,22 @@ const Transactions = () => {
     search,
   });
  
+  useEffect(() => {
+    if (!isDetail) {
+      refetch();
+    }
+  }, [isDetail]);
+
   const handleView = async row => {
    
-    Swal.fire({
-      icon: 'success',
-      title: 'Transaction Detail',
-      text: `${row.merchantId}'s transaction ${row.transactionId} has been ${row.status}.`,
-      showConfirmButton: true,
-    });
+    setSelectedRow(row);
+    setIsDetail(true);
+    // Swal.fire({
+    //   icon: 'success',
+    //   title: 'Transaction Detail',
+    //   text: `${row.merchantId}'s transaction ${row.transactionId} has been ${row.status}.`,
+    //   showConfirmButton: true,
+    // });
    
   };
 
@@ -218,55 +229,68 @@ const Transactions = () => {
 
   return (
     <Box m="1.5rem 2.5rem">
-      <Header title="TRANSACTION" subTitle="Entire list of transactions" />
-      <Box
-        height="80vh"
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: theme.palette.background.alt,
-            color: theme.palette.secondary[100],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: theme.palette.primary.light,
-          },
-          "& .MuiDataGrid-footerContainer": {
-            backgroundColor: theme.palette.background.alt,
-            color: theme.palette.secondary[100],
-            borderTop: "none",
-          },
-          "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: `${theme.palette.secondary[200]} !important`,
-          },
-        }}
-      >
-        <DataGrid 
-            loading={isLoading || !data}
-            getRowId={(row) => row._id}
-            rows={(data && data.transactions) || []}
-            columns={transactionTableColumns}
-            rowCount={(data && data.total) || 0}
-            rowsPerPageOptions={[20, 50, 100]}
-            pagination
-            page={page}
-            pageSize={pageSize}
-            paginationMode="server"
-            sortingMode="server"
-            onPageChange={(newPage) => setPage(newPage)}
-            onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-            onSortModelChange={(newSortModel) => setSort(newSortModel)}
-            components={{Toolbar: DataGridCustomToolbar}}
-            componentsProps={{
-              toolbar: {searchInput, setSearchInput, setSearch}
+      {!isDetail && (
+        <>
+          <Header title="TRANSACTION" subTitle="Entire list of transactions" />
+          <Box
+            height="80vh"
+            sx={{
+              "& .MuiDataGrid-root": {
+                border: "none",
+              },
+              "& .MuiDataGrid-cell": {
+                borderBottom: "none",
+              },
+              "& .MuiDataGrid-columnHeaders": {
+                backgroundColor: theme.palette.background.alt,
+                color: theme.palette.secondary[100],
+                borderBottom: "none",
+              },
+              "& .MuiDataGrid-virtualScroller": {
+                backgroundColor: theme.palette.primary.light,
+              },
+              "& .MuiDataGrid-footerContainer": {
+                backgroundColor: theme.palette.background.alt,
+                color: theme.palette.secondary[100],
+                borderTop: "none",
+              },
+              "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
+                color: `${theme.palette.secondary[200]} !important`,
+              },
             }}
-        />
-      </Box>
+          >
+            <DataGrid 
+                loading={isLoading || !data}
+                getRowId={(row) => row._id}
+                rows={(data && data.transactions) || []}
+                columns={transactionTableColumns}
+                rowCount={(data && data.total) || 0}
+                rowsPerPageOptions={[20, 50, 100]}
+                pagination
+                page={page}
+                pageSize={pageSize}
+                paginationMode="server"
+                sortingMode="server"
+                onPageChange={(newPage) => setPage(newPage)}
+                onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+                onSortModelChange={(newSortModel) => setSort(newSortModel)}
+                components={{Toolbar: DataGridCustomToolbar}}
+                componentsProps={{
+                  toolbar: {searchInput, setSearchInput, setSearch}
+                }}
+            />
+          </Box>
+        </>          
+      )}    
+      {isDetail && (
+        <>
+          <Header title="TRANSACTION" subTitle="Details of a transaction" />
+          <Detail
+            selectedRow={selectedRow}
+            setIsDetail={setIsDetail}
+          />
+        </>
+      )}
     </Box>
   );
 };

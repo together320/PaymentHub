@@ -688,7 +688,7 @@ const Transactions = () => {
       !cityError &&
       country !== null &&
       !countryError &&
-      clientIP &&
+      // clientIP &&
       !clientIPError &&
       amount &&
       !amountError &&

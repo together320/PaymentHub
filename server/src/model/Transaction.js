@@ -3,9 +3,9 @@ import mongoose from "mongoose";
 const TransactionSchema = new mongoose.Schema(
   {
     merchantId: String,
-    transactionId: String,
     transactionType: String,
     paymentMethod: String,
+    transactionId: String,
     orderId: String,
     orderDetail: String,
     firstName: String,

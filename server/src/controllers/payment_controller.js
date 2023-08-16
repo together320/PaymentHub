@@ -248,7 +248,7 @@ export const process_2d = async (req, res) => {
       let status = "";
       if (resp.data.status === "success") {
         status = "approved";
-      } else {
+      } else if (resp.data.status === "fail"){
         status = "declined";
       }
       newTransaction.status = status;
@@ -458,5 +458,49 @@ export const callback_mps = async (req, res) => {
   } catch (e) {
     console.log('callback_mps_error', e.message);
     return res.status(500).json({success: false, message: 'Processing transaction failed.'});  
+  }
+};
+
+export const fetch_status = async (req, res) => {
+  const apiKey = req.headers['x-api-key'];
+  const data = req.body;
+  console.log('fetch-status', data);
+
+  try {
+    const merchant = await User.findOne({name: data.mid, apiKey, status: 'activated'});
+    if (!merchant) {
+      return res.status(200).json({
+        success: false,
+        message: "There is not existing activated merchant with API key"
+      })
+    }
+
+    const transaction = await Transaction.findOne({
+			transactionId: data.transactionId,
+      merchantId: data.mid,
+      orderId: data.orderId,
+		});
+
+		if (!transaction) {
+			return res.status(200).json({
+        success: false,
+        message: "There is not existing activated merchant with API key"
+      })
+		}
+		
+    return res.status(200).json({
+      success: true,
+      status: transaction.status,
+      amount: transaction.amount,
+      currency: transaction.currency,
+      time: new Date(),
+    })
+
+  } catch (e) {
+    console.log('fetch-status-error', e.message)
+    res.status(400).json({ 
+      success: false,
+      message: "Bad request" 
+    });
   }
 };
