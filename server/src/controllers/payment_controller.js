@@ -237,20 +237,20 @@ export const process_2d = async (req, res) => {
     .then(async (resp) => {
       console.log('mps-pay-res', resp.data);
 
-      if (resp.data.message) {
-        newTransaction.status = "error";
-        newTransaction.response = JSON.stringify(resp.data);
-        newTransaction.statusDate = new Date();
-        newTransaction.paymentId = resp.transaction_id?resp.transaction_id:'';
-        await newTransaction.save();
-        return res.status(200).json({error: resp.data.message});
-      }
+      // if (resp.data.message) {
+      //   newTransaction.status = "declined";
+      //   newTransaction.response = JSON.stringify(resp.data);
+      //   newTransaction.statusDate = new Date();
+      //   newTransaction.paymentId = resp.transaction_id?resp.transaction_id:'';
+      //   await newTransaction.save();
+      //   return res.status(200).json({error: resp.data.message});
+      // }
 
       if (resp.data.error) {
         newTransaction.status = "error";
         newTransaction.response = JSON.stringify(resp.data);
         newTransaction.statusDate = new Date();
-        newTransaction.paymentId = resp.transaction_id?resp.transaction_id:'';
+        newTransaction.paymentId = resp.data.transaction_id?resp.data.transaction_id:'';
         await newTransaction.save();
         return res.status(200).json({error: resp.data.error});
       }
@@ -264,7 +264,7 @@ export const process_2d = async (req, res) => {
       newTransaction.status = status;
       newTransaction.response = JSON.stringify(resp.data);
       newTransaction.statusDate = new Date();
-      newTransaction.paymentId = resp.transaction_id;
+      newTransaction.paymentId = resp.data.transaction_id?resp.data.transaction_id:'';
       await newTransaction.save();
     
       let payload = {};
@@ -281,7 +281,7 @@ export const process_2d = async (req, res) => {
         payload = {
           orderId: newTransaction.orderId,
           status: "declined",
-          message: "Transaction has been declined."
+          message: "Transaction has been declined. " + resp.data.message
         };
       }
 
@@ -442,26 +442,28 @@ export const callback_mps = async (req, res) => {
       };
     }
 
-    await axios
-    .post(
-      transaction.callbackUrl,
-      payload,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      }
-    )
-    .then(async (resp) => {
-      console.log('callback-mps-callback-to-mechant-resp', resp.data);
-      if (resp.status !== 200) {
-        console.log('Should resend the callback to ', transaction.callbackUrl, payload);
-      }
-    })
-    .catch((e) => {
-      console.log('callback-mps-callback-to-mechant-resp-error', e.message);
-    });
+    if (transaction.callbackUrl) {
+      await axios
+      .post(
+        transaction.callbackUrl,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        }
+      )
+      .then(async (resp) => {
+        console.log('callback-mps-callback-to-mechant-resp', resp.data);
+        if (resp.status !== 200) {
+          console.log('Should resend the callback to ', transaction.callbackUrl, payload);
+        }
+      })
+      .catch((e) => {
+        console.log('callback-mps-callback-to-mechant-resp-error', e.message);
+      });
+    }    
     
     res.status(200).json({success: true, message: 'Transaction has been processed.'});  
     
