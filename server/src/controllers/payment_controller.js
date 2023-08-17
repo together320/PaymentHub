@@ -30,6 +30,13 @@ export const process_hpp = async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   const data = req.body;
   console.log('data-hpp', data);
+  
+  if (!data.mid || !data.orderId || !data.orderDetail || !data.amount || !data.currency || !data.redirectUrl || !data.callbackUrl) {
+    return res.status(200).json({
+      status: "fail",
+      message: "Required fields are not filled out."
+    })
+  }
 
   ////////////////////////////////////////////////////////////////////////////////////
   // header = {
@@ -49,9 +56,11 @@ export const process_hpp = async (req, res) => {
   ////////////////////////////////////////////////////////////////////////////////////
 
   try {
+ 
     const merchant = await User.findOne({name: data.mid, apiKey, status: 'activated'});
     if (!merchant) {
-      return res.status(400).json({
+      return res.status(200).json({
+        status: "fail",
         message: "There is not existing activated merchant with API key"
       })
     }
@@ -107,14 +116,14 @@ export const process_hpp = async (req, res) => {
           hash: resp.data.response.hash
         });
       } else {
-        res.status(400).json({
+        res.status(200).json({
           status: "fail",
           message: "Request failed"
         });
       }      
     })
     .catch((e) => {
-      console.log(e);
+      console.log('transxnd-hpp-resp-error', e.message);
       res.status(400).json({
         status: "fail",
         message: "Request failed"
@@ -122,6 +131,7 @@ export const process_hpp = async (req, res) => {
     });
 
   } catch (e) {
+    console.log('transxnd-hpp-error', e.message);
     res.status(404).json({ 
       status: "fail",
       message: e.message 
@@ -143,12 +153,20 @@ export const process_2d = async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   const data = req.body;
   console.log('data-2d', data);
+  
+  if (!data.mid || !data.firstName || !data.lastName || !data.email || !data.phone || !data.address || !data.city || !data.state || !data.country || !data.zipCode || !data.cardNumber || !data.cardCVV || !data.cardExpYear ||  !data.cardExpMonth ||  !data.clientIp || !data.orderId || !data.orderDetail || !data.amount || !data.currency || !data.redirectUrl || !data.callbackUrl) {
+    return res.status(200).json({
+      status: "fail",
+      message: "Required fields are not filled out."
+    })
+  }
 
   try {
     const merchant = await User.findOne({name: data.mid, apiKey, status: 'activated'});
     if (!merchant) {
       return res.status(200).json({
-        error: "There is not existing activated merchant with API key"
+        status: "fail",
+        message: "There is not existing activated merchant with API key"
       })
     }
 
@@ -162,7 +180,8 @@ export const process_2d = async (req, res) => {
       mps_secret = MPS_SECRET2;
     } else {
       return res.status(200).json({
-        error: "This merchant is not allowed 2D transactions"
+        status: "fail",
+        message: "This merchant is not allowed 2D transactions"
       });
     }
 
@@ -188,7 +207,7 @@ export const process_2d = async (req, res) => {
       order_id: trxId,
       order_description: data.orderDetail,
       description: data.orderDetail,
-      customer_ip: data.clientIp,
+      customer_ip: data.clientIp?data.clientIp:req.ip,
       amount: data.amount,
       card_no: data.cardNumber,
       card_cvv: data.cardCVV,
@@ -212,7 +231,7 @@ export const process_2d = async (req, res) => {
       state: data.state,
       country: data.country,
       zipCode: data.zipCode,
-      clientIp: data.clientIp,
+      clientIp: data.clientIp?data.clientIp:req.ip,
       amount: data.amount,
       currency: data.currency,
       orderId: data.orderId,
@@ -252,7 +271,9 @@ export const process_2d = async (req, res) => {
         newTransaction.statusDate = new Date();
         newTransaction.paymentId = resp.data.transaction_id?resp.data.transaction_id:'';
         await newTransaction.save();
-        return res.status(200).json({error: resp.data.error});
+        return res.status(200).json({
+          status: "error",
+          message: resp.data.error});
       }
 
       let status = "";
@@ -288,14 +309,15 @@ export const process_2d = async (req, res) => {
       res.status(200).json(payload);   
     })
     .catch((e) => {
-      console.log(e);
-      res.status(400).json({
+      console.log('mps-card-res-error', e.message);
+      res.status(200).json({
         status: "fail",
-        message: "Request failed"
+        message: "Bad request body"
       });
     });
 
   } catch (e) {
+    console.log('mps-2d-error', e.message);
     res.status(404).json({ 
       status: "fail",
       message: e.message 
