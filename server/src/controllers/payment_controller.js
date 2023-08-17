@@ -30,7 +30,7 @@ export const process_hpp = async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   const data = req.body;
   console.log('data-hpp', data);
-  
+
   if (!data.mid || !data.orderId || !data.orderDetail || !data.amount || !data.currency || !data.redirectUrl || !data.callbackUrl) {
     return res.status(200).json({
       status: "fail",
@@ -153,7 +153,7 @@ export const process_2d = async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   const data = req.body;
   console.log('data-2d', data);
-  
+
   if (!data.mid || !data.firstName || !data.lastName || !data.email || !data.phone || !data.address || !data.city || !data.state || !data.country || !data.zipCode || !data.cardNumber || !data.cardCVV || !data.cardExpYear ||  !data.cardExpMonth ||  !data.clientIp || !data.orderId || !data.orderDetail || !data.amount || !data.currency || !data.redirectUrl || !data.callbackUrl) {
     return res.status(200).json({
       status: "fail",
@@ -386,23 +386,26 @@ export const callback_transxnd_hpp = async (req, res) => {
       };
     }
 
-    await axios
-    .post(
-      transaction.callbackUrl,
-      payload,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      }
-    )
-    .then(async (resp) => {
-      console.log('callback-trnsxnd-hpp-callback-to-mechant-resp', resp.data);
-    })
-    .catch((e) => {
-      console.log('callback-trnsxnd-hpp-callback-to-mechant-resp-error', e.message);
-    });
+    if (transaction.callbackUrl) {
+      await axios
+      .post(
+        transaction.callbackUrl,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        }
+      )
+      .then(async (resp) => {
+        console.log('callback-trnsxnd-hpp-callback-to-mechant-resp', resp.data);
+      })
+      .catch((e) => {
+        console.log('callback-trnsxnd-hpp-callback-to-mechant-resp-error', e.message);
+      });
+    }
+    
     return res.redirect(transaction.redirectUrl);
     
   } catch (e) {
