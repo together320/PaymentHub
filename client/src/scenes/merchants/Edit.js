@@ -68,7 +68,7 @@ const Edit = ({ selectedRow, setIsEditing }) => {
       setStatusError('');
     }
 
-    if (!name || nameError || !type || typeError || !currency || currencyError || !apiKey || apiKeyError || !mode || setModeError || !status || setStatusError) {
+    if (!name || nameError || !type || typeError || !currency || currencyError || !apiKey || apiKeyError || !mode || modeError || !status || statusError) {
       return Swal.fire({
         icon: 'error',
         title: 'Error!',
