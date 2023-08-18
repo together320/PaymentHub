@@ -12,11 +12,11 @@ const TRANSXND_ID = "Payhub";
 const TRANSXND_PWD = "Payhub";
 const TRANSXND_KEY = "91e03e8147911f8d9a380af0065529a64bc40218c526c0c372e4c2c7a209f3d99630b316c244fbf5388a86aae160a64cbc3e0db13348a96c203dfb1ce2ce7edf";
 
-// sandbox
-// const TRANSXND_URL = 'https://devpg.transxnd.com/api';
-// const TRANSXND_ID = "payhub";
-// const TRANSXND_PWD = "payhub";
-// const TRANSXND_KEY = "78996876853450bf2808efd88f8a1d656a39f043bae25abd6c2c99f2b938b057cb1946f63693b80afba81161fa3c75ef04943a2733ca3dd85b52295caf47b9a8";
+// test
+const TRANSXND_URL_TEST = 'https://devpg.transxnd.com/api';
+const TRANSXND_ID_TEST = "payhub";
+const TRANSXND_PWD_TEST = "payhub";
+const TRANSXND_KEY_TEST = "78996876853450bf2808efd88f8a1d656a39f043bae25abd6c2c99f2b938b057cb1946f63693b80afba81161fa3c75ef04943a2733ca3dd85b52295caf47b9a8";
 
 // PRODUCTION
 // "client_id": "Payhub",
@@ -65,19 +65,21 @@ export const process_hpp = async (req, res) => {
       })
     }
 
+    let test = merchant.mode === "test";
+
     const config = {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        Authorization: `Bearer ${TRANSXND_KEY}`,
+        Authorization: `Bearer ${test?TRANSXND_KEY_TEST:TRANSXND_KEY}`,
       },
     };
 
     const trxId = uuidv4();
     const refId = uuidv4();
     const paybody = {
-      client_id: TRANSXND_ID,
-      client_pwd: TRANSXND_PWD,
+      client_id: test?TRANSXND_ID_TEST:TRANSXND_ID,
+      client_pwd: test?TRANSXND_PWD_TEST:TRANSXND_PWD,
       orderId: trxId,
       amount: data.amount,
       description: "Trans_Pay", // data.orderDetail,
@@ -87,7 +89,7 @@ export const process_hpp = async (req, res) => {
 
     await axios
     .post(
-      TRANSXND_URL + '/makePayment',
+      test?TRANSXND_URL_TEST:TRANSXND_URL + '/makePayment',
       paybody,
       config
     )
@@ -107,7 +109,8 @@ export const process_hpp = async (req, res) => {
           redirectUrl: data.redirectUrl,
           callbackUrl: data.callbackUrl,
           session: resp.data.response.session,
-          hash: resp.data.response.hash
+          hash: resp.data.response.hash,
+          mode: test?"test":"live"
         }); 
         res.status(200).json({
           status: "success",
@@ -141,6 +144,9 @@ export const process_hpp = async (req, res) => {
 
 //////////////// MPS ////////////////////////
 const MPS_URL = 'https://processing.merchantpayservices.com/api/v1.1';
+// test
+const MPS_KEY_TEST = '645aa724d2c5a';
+const MPS_SECRET_TEST = '9c9e6a6b671dc77aedd9006064e72829';
 // APM
 const MPS_KEY = '645aa724d2c5a';
 const MPS_SECRET = '9c9e6a6b671dc77aedd9006064e72829';
@@ -172,6 +178,7 @@ export const process_2d = async (req, res) => {
 
     let mps_key = "";
     let mps_secret = "";
+
     if (merchant.type === "2D (APM)") {
       mps_key = MPS_KEY;
       mps_secret = MPS_SECRET;
@@ -183,6 +190,13 @@ export const process_2d = async (req, res) => {
         status: "fail",
         message: "This merchant is not allowed 2D transactions"
       });
+    }
+
+    let test = merchant.mode === "test";
+    
+    if (test) {
+      mps_key = MPS_KEY_TEST;
+      mps_secret = MPS_SECRET_TEST;
     }
 
     const config = {
@@ -244,6 +258,7 @@ export const process_2d = async (req, res) => {
       redirectUrl: data.redirectUrl,
       callbackUrl: data.callbackUrl,
       status: 'pending',
+      mode: test?"test":"live"
 
     }); 
 
@@ -539,5 +554,30 @@ export const fetch_status = async (req, res) => {
       success: false,
       message: "Bad request" 
     });
+  }
+};
+
+export const update_trans_status = async (req, res) => {
+  console.log('---update_trans_status---');
+	console.log('req.query', req.query);
+	const data = req.query;
+	const txId = data.transactionId;
+	try {
+		const transaction = await Transaction.findOne({
+			transactionId: txId,
+		});
+		if (!transaction) {
+			return res.send("There is no transaction.");
+		}
+		
+    transaction.status = data.status;
+    transaction.response = JSON.stringify(data);
+    transaction.statusDate = new Date();
+    transaction.paymentId = data.paymentId;
+    await transaction.save();
+    res.send('Transaction status has been updated.');  
+  } catch (e) {
+    console.log('update_trans_status_error', e.message);
+    return res.send('Updating transaction status failed.');  
   }
 };

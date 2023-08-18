@@ -40,6 +40,11 @@ const Transactions = () => {
       flex: 0.7,
     },
     {
+      field: "mode",
+      headerName: "Mode",
+      flex: 0.5,
+    },
+    {
       field: "transactionId",
       headerName: "Txn ID",
       flex: 1,

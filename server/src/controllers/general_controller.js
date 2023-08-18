@@ -441,7 +441,7 @@ export const addUser =  async (req, res) => {
 };
 
 export const updateUser =  async (req, res) => {
-  const { id, name, type="2d", currency="USD", apiKey="" } = req.body;
+  const { id, name, type="2D (APM)", currency="USD", apiKey="", mode="test", status="activated" } = req.body;
 
   if (!name || !type || !currency || !apiKey) {
     return res.status(400).json({ message: 'Please enter all fields' });
@@ -455,6 +455,8 @@ export const updateUser =  async (req, res) => {
     user.type = type;
     user.currency = currency;
     user.apiKey = apiKey;
+    user.mode = mode;
+    user.status = status;
 
     const savedUser = await user.save();
     if (!savedUser) throw Error('Something went wrong saving the user');

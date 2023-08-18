@@ -146,7 +146,7 @@ export const generalApi = {
     return {
         getUser: (id) => http.get(url + `/getUser/${id}`).then(res => res.data),
         addUser: ({name, email, password, type, currency, apiKey}) => http.post(url + `/addUser`, {name, email, password, type, currency, apiKey}),
-        updateUser: ({id, name, type, currency, apiKey}) => http.post(url + `/updateUser`, {id, name, type, currency, apiKey}),
+        updateUser: ({id, name, type, currency, apiKey, mode, status}) => http.post(url + `/updateUser`, {id, name, type, currency, apiKey, mode, status}),
         deleteUser: (id) => http.post(url + `/deleteUser`, {id}),
         deleteTransaction: (id) => http.post(url + `/deleteTransaction`, {id}),
 

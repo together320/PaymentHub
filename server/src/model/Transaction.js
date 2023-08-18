@@ -41,6 +41,11 @@ const TransactionSchema = new mongoose.Schema(
     },
     response: String,
     statusDate: Date,
+    mode: {
+      type: String,
+      enum: ["test", "live"],
+      default: "test",
+    },
 },
   { timestamps: true }
 );

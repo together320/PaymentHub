@@ -18,12 +18,16 @@ const Edit = ({ selectedRow, setIsEditing }) => {
   const [type, setType] = useState(selectedRow.type);
   const [currency, setCurrency] = useState(selectedRow.currency);
   const [apiKey, setApiKey] = useState(selectedRow.apiKey);
+  const [mode, setMode] = useState(selectedRow.mode);
+  const [status, setStatus] = useState(selectedRow.status);
 
   
   const [nameError, setNameError] = useState('');  
   const [typeError, setTypeError] = useState('');
   const [currencyError, setCurrencyError] = useState('');  
-  const [apiKeyError, setApiKeyError] = useState('');
+  const [apiKeyError, setApiKeyError] = useState(''); 
+  const [modeError, setModeError] = useState(''); 
+  const [statusError, setStatusError] = useState('');
 
   const handleUpdate = e => {
     e.preventDefault();
@@ -52,7 +56,19 @@ const Edit = ({ selectedRow, setIsEditing }) => {
       setApiKeyError('');
     }
 
-    if (!name || nameError || !type || typeError || !currency || currencyError || !apiKey || apiKeyError) {
+    if (!mode) {
+      setModeError('Please select a mode.');
+    } else {
+      setModeError('');
+    }
+
+    if (!status) {
+      setStatusError('Please select status.');
+    } else {
+      setStatusError('');
+    }
+
+    if (!name || nameError || !type || typeError || !currency || currencyError || !apiKey || apiKeyError || !mode || setModeError || !status || setStatusError) {
       return Swal.fire({
         icon: 'error',
         title: 'Error!',
@@ -61,7 +77,7 @@ const Edit = ({ selectedRow, setIsEditing }) => {
       });
     }
 
-    generalApi.general().updateUser({ id, name, type, currency, apiKey })
+    generalApi.general().updateUser({ id, name, type, currency, apiKey, mode, status })
     .then(res => {
       setIsEditing(false);
 
@@ -114,6 +130,14 @@ const Edit = ({ selectedRow, setIsEditing }) => {
     setApiKey(event.target.value);
   };
 
+  const handleModeChange = (event) => {
+    setMode(event.target.value);
+  };
+
+  const handleStatusChange = (event) => {
+    setStatus(event.target.value);
+  };
+
   return (
     <Box
       mt="20px"
@@ -127,7 +151,7 @@ const Edit = ({ selectedRow, setIsEditing }) => {
     >
       <Box
         gridColumn="span 12"
-        gridRow="span 3"
+        gridRow="span 4"
         backgroundColor={theme.palette.background.alt}
         p="1rem"
         borderRadius="0.55rem"
@@ -225,6 +249,52 @@ const Edit = ({ selectedRow, setIsEditing }) => {
               helperText={apiKeyError}
             />
           </Box> 
+          <Box
+            width="100%"
+            gridColumn="span 6"
+            gridRow="span 1"
+            // backgroundColor={theme.palette.background.alt}
+            p="1rem"
+          >
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Mode*</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={mode}
+                label="Mode"
+                onChange={handleModeChange}
+                error={!!modeError}
+                helperText={modeError}
+              >
+                <MenuItem value={'test'}>test</MenuItem>
+                <MenuItem value={'live'}>live</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+          <Box
+            width="100%"
+            gridColumn="span 6"
+            gridRow="span 1"
+            // backgroundColor={theme.palette.background.alt}
+            p="1rem"
+          >
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Status*</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={status}
+                label="Status"
+                onChange={handleStatusChange}
+                error={!!statusError}
+                helperText={statusError}
+              >
+                <MenuItem value={'activated'}>activated</MenuItem>
+                <MenuItem value={'deactivated'}>deactivated</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>          
         </Box>        
       </Box> 
       <Button id="submit" variant="contained" onClick={handleUpdate}>Update</Button>

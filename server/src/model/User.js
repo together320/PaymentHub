@@ -28,7 +28,7 @@ const UserSchema = new mongoose.Schema(
     // transactions: Array,
     type: {
       type: String,
-      enum: ["2D (APM)", "2D (APM2)", "3D", "HPP"],
+      enum: ["2D (APM)", "2D (APM2)", "S2S", "HPP"],
       default: "HPP",
     },
     currency: {
@@ -46,7 +46,12 @@ const UserSchema = new mongoose.Schema(
       type: String,
       enum: ["activated", "deactivated"],
       default: "activated",
-    }
+    },
+    mode: {
+      type: String,
+      enum: ["test", "live"],
+      default: "test",
+    },
   },
   { timestamps: true }
 );

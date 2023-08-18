@@ -30,7 +30,7 @@ const Merchants = () => {
   const { data, isLoading, refetch } = useGetMerchantsQuery();
   
   const merchantTableColumns = [
-   {
+    {
       field: "name",
       headerName: "Merchant Name",
       flex: 1,
@@ -59,6 +59,11 @@ const Merchants = () => {
       field: "createdAt",
       headerName: "Create Date",
       flex: 1
+    },
+    {
+      field: "mode",
+      headerName: "Mode",
+      flex: 0.5
     },
     {
       field: "status",
