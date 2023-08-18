@@ -73,7 +73,8 @@ export const fetchTransactions = async (req, res) => {
               { merchantId: { $regex: new RegExp(search, "i") } },
               { orderId: { $regex: new RegExp(search, "i") } },
               { transactionId: { $regex: new RegExp(search, "i") } },
-              { paymentId: { $regex: new RegExp(search, "i") } }
+              { paymentId: { $regex: new RegExp(search, "i") } },
+              { mode: { $regex: new RegExp(search, "i") } }
             ]
           }
         ]
@@ -85,7 +86,8 @@ export const fetchTransactions = async (req, res) => {
           { merchantId: { $regex: new RegExp(search, "i") } },
           { orderId: { $regex: new RegExp(search, "i") } },
           { transactionId: { $regex: new RegExp(search, "i") } },
-          { paymentId: { $regex: new RegExp(search, "i") } }
+          { paymentId: { $regex: new RegExp(search, "i") } },
+          { mode: { $regex: new RegExp(search, "i") } }
         ]
       };
     }

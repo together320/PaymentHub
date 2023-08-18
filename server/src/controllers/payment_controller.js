@@ -3,6 +3,7 @@ import User from "../model/User.js";
 import getCountryISO3 from "country-iso-2-to-3";
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+const { nanoid } = require('nanoid');
 
 const SERVER_URL = 'https://paymenthub.uk/api';
 
@@ -75,7 +76,7 @@ export const process_hpp = async (req, res) => {
       },
     };
 
-    const trxId = uuidv4();
+    const trxId = nanoid(8); // uuidv4();
     const refId = uuidv4();
     const paybody = {
       client_id: test?TRANSXND_ID_TEST:TRANSXND_ID,
@@ -83,7 +84,7 @@ export const process_hpp = async (req, res) => {
       orderId: trxId,
       amount: data.amount,
       description: "Trans_Pay", // data.orderDetail,
-      idempotence_key: refId,
+      idempotence_key: data.orderId, // refId,
       currency: data.currency
     }
 
@@ -97,7 +98,7 @@ export const process_hpp = async (req, res) => {
       console.log('transxnd-pay-res', resp.data);
       if (resp.data.status === "SUCCESS") {
         const newTransaction = await Transaction.create({
-          merchantId: data.mid,
+          merchantId: merchant.name,
           amount: data.amount,
           currency: data.currency,
           transactionId: trxId,
@@ -206,7 +207,8 @@ export const process_2d = async (req, res) => {
       },
     };
 
-    const trxId = uuidv4();
+    const trxId = nanoid(8); // uuidv4();
+
     const paybody = {
       first_name: data.firstName,
       last_name: data.lastName,
@@ -231,7 +233,7 @@ export const process_2d = async (req, res) => {
     };
 
     const newTransaction = await Transaction.create({
-      merchantId: data.mid,
+      merchantId: merchant.name,
       transactionId: trxId,
       transactionType: merchant.type,
       paymentMethod: 'MPS',
@@ -574,6 +576,8 @@ export const update_trans_status = async (req, res) => {
     transaction.response = JSON.stringify(data);
     transaction.statusDate = new Date();
     transaction.paymentId = data.paymentId;
+    if (data.mode)
+      transaction.mode = data.mode;
     await transaction.save();
     res.send('Transaction status has been updated.');  
   } catch (e) {
