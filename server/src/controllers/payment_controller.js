@@ -3,7 +3,7 @@ import User from "../model/User.js";
 import getCountryISO3 from "country-iso-2-to-3";
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-const { nanoid } = require('nanoid');
+import { nanoid } from 'nanoid';
 
 const SERVER_URL = 'https://paymenthub.uk/api';
 
