@@ -161,7 +161,7 @@ export const process_2d = async (req, res) => {
   const data = req.body;
   console.log('data-2d', data);
 
-  if (!data.mid || !data.firstName || !data.lastName || !data.email || !data.phone || !data.address || !data.city || !data.state || !data.country || !data.zipCode || !data.cardNumber || !data.cardCVV || !data.cardExpYear ||  !data.cardExpMonth ||  !data.clientIp || !data.orderId || !data.orderDetail || !data.amount || !data.currency) {
+  if (!data.mid || !data.firstName || !data.lastName || !data.email || !data.phone || !data.address || !data.city || !data.state || !data.country || !data.zipCode || !data.cardNumber || !data.cardCVV || !data.cardExpYear ||  !data.cardExpMonth ||  !data.clientIp || !data.orderDetail || !data.amount || !data.currency) {
     return res.status(200).json({
       status: "fail",
       message: "Required fields are not filled out."
