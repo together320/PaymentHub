@@ -725,7 +725,7 @@ const Transactions = () => {
         city: city,
         state: state,
         country: country.code,
-        zipcode: zipCode,
+        zipCode: zipCode,
         clientIp: clientIP,
         amount: amount,
         currency: currency,
