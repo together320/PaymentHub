@@ -745,19 +745,19 @@ const Transactions = () => {
       paymentApi.payment().payment2d(headers, payload)
         .then(res => {   
           console.log('vitual terminal res', res.data);
-          if (res.data.error) {
+          if (res.data.status === "approved") {
             // alert(res.data.error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error!',
-              text: res.data.error,
+           Swal.fire({
+              icon: 'success',
+              title: 'Success!',
+              text: res.data.message,
               showConfirmButton: true,
             });
           } else {
             // alert(res.data.status + ': ' + res.data.message);
-            Swal.fire({
-              icon: 'success',
-              title: 'Success!',
+             Swal.fire({
+              icon: 'error',
+              title: 'Error!',
               text: res.data.message,
               showConfirmButton: true,
             });
