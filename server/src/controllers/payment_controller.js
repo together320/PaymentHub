@@ -146,8 +146,8 @@ export const process_hpp = async (req, res) => {
 //////////////// MPS ////////////////////////
 const MPS_URL = 'https://processing.merchantpayservices.com/api/v1.1';
 // test
-const MPS_KEY_TEST = '645aa724d2c5a';
-const MPS_SECRET_TEST = '9c9e6a6b671dc77aedd9006064e72829';
+const MPS_KEY_TEST = '644aeb143d3f7';
+const MPS_SECRET_TEST = '4d53ac79e34ee00ecb6eba1287ceca11';
 // APM
 const MPS_KEY = '645aa724d2c5a';
 const MPS_SECRET = '9c9e6a6b671dc77aedd9006064e72829';
