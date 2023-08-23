@@ -67,6 +67,7 @@ export const process_hpp = async (req, res) => {
     }
 
     let test = merchant.mode === "test";
+    // console.log('mode----test', test);
 
     const config = {
       headers: {
@@ -90,7 +91,7 @@ export const process_hpp = async (req, res) => {
 
     await axios
     .post(
-      test?TRANSXND_URL_TEST:TRANSXND_URL + '/makePayment',
+      (test?TRANSXND_URL_TEST:TRANSXND_URL) + '/makePayment',
       paybody,
       config
     )
@@ -344,6 +345,190 @@ export const process_2d = async (req, res) => {
 };
 
 export const process_3d = async (req, res) => {
+  const apiKey = req.headers['x-api-key'];
+  const data = req.body;
+  console.log('data-3d', data);
+
+  if (!data.mid || !data.firstName || !data.lastName || !data.email || !data.phone || !data.address || !data.city || !data.state || !data.country || !data.zipCode || !data.cardNumber || !data.cardCVV || !data.cardExpYear ||  !data.cardExpMonth ||  !data.clientIp || !data.orderDetail || !data.amount || !data.currency) {
+    return res.status(200).json({
+      status: "fail",
+      message: "Required fields are not filled out."
+    })
+  }
+
+  try {
+    const merchant = await User.findOne({name: data.mid, apiKey, status: 'activated'});
+    if (!merchant) {
+      return res.status(200).json({
+        status: "fail",
+        message: "There is not existing activated merchant with API key"
+      })
+    }
+
+    let mps_key = "";
+    let mps_secret = "";
+
+    if (merchant.type === "2D (APM)") {
+      mps_key = MPS_KEY;
+      mps_secret = MPS_SECRET;
+    } else if (merchant.type === "2D (APM2)") {
+      mps_key = MPS_KEY2;
+      mps_secret = MPS_SECRET2;
+    } else {
+      return res.status(200).json({
+        status: "fail",
+        message: "This merchant is not allowed 2D transactions"
+      });
+    }
+
+    let test = merchant.mode === "test";
+    
+    if (test) {
+      mps_key = MPS_KEY_TEST;
+      mps_secret = MPS_SECRET_TEST;
+    }
+
+    const config = {
+      headers: {
+        'Authorization': `${mps_key}:${mps_secret}`,
+        'Content-Type': 'application/json'
+      },
+    };
+
+    const trxId = nanoid(8); // uuidv4();
+
+    const paybody = {
+      first_name: data.firstName,
+      last_name: data.lastName,
+      email: data.email,
+      mobile: data.phone,
+      billing_address1: data.address,
+      billing_address2: "",
+      billing_city: data.city,
+      billing_state: data.state,
+      billing_country: data.country,
+      billing_zip: data.zipCode,
+      order_id: trxId,
+      order_description: data.orderDetail,
+      description: data.orderDetail,
+      customer_ip: data.clientIp?data.clientIp:req.ip,
+      amount: data.amount,
+      card_no: data.cardNumber,
+      card_cvv: data.cardCVV,
+      expiry_month: data.cardExpMonth,
+      expiry_year: data.cardExpYear,
+      endpoint: SERVER_URL + '/payment/callbackMps'
+    };
+
+    const newTransaction = await Transaction.create({
+      merchantId: merchant.name,
+      transactionId: trxId,
+      transactionType: merchant.type,
+      paymentMethod: 'MPS',
+      firstName: data.firstName,
+      lastName: data.lastName,
+      name: data.firstName + ' ' + data.lastName,
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
+      city: data.city,
+      state: data.state,
+      country: data.country,
+      zipCode: data.zipCode,
+      clientIp: data.clientIp?data.clientIp:req.ip,
+      amount: data.amount,
+      currency: data.currency,
+      orderId: data.orderId,
+      orderDetail: data.orderDetail,
+      cardType: data.cardType,
+      cardNumber: data.cardNumber,
+      cardCVV: data.cardCVV,
+      cardExpMonth: data.cardExpMonth,
+      cardExpYear: data.cardExpYear,
+      redirectUrl: data.redirectUrl,
+      callbackUrl: data.callbackUrl,
+      status: 'pending',
+      mode: test?"test":"live"
+
+    }); 
+
+    await axios
+    .post(
+      MPS_URL + '/payment_api/card',
+      paybody,
+      config
+    )
+    .then(async (resp) => {
+      console.log('mps-pay-res', resp.data);
+
+      // if (resp.data.message) {
+      //   newTransaction.status = "declined";
+      //   newTransaction.response = JSON.stringify(resp.data);
+      //   newTransaction.statusDate = new Date();
+      //   newTransaction.paymentId = resp.transaction_id?resp.transaction_id:'';
+      //   await newTransaction.save();
+      //   return res.status(200).json({error: resp.data.message});
+      // }
+
+      if (resp.data.error) {
+        newTransaction.status = "error";
+        newTransaction.response = JSON.stringify(resp.data);
+        newTransaction.statusDate = new Date();
+        newTransaction.paymentId = resp.data.transaction_id?resp.data.transaction_id:'';
+        await newTransaction.save();
+       
+        return res.status(200).json({
+          status: "error",
+          message: resp.data.error});
+      }
+
+      let status = "";
+      if (resp.data.status === "success") {
+        status = "approved";
+      } else if (resp.data.status === "fail"){
+        status = "declined";
+      }
+      newTransaction.status = status;
+      newTransaction.response = JSON.stringify(resp.data);
+      newTransaction.statusDate = new Date();
+      newTransaction.paymentId = resp.data.transaction_id?resp.data.transaction_id:'';
+      await newTransaction.save();
+    
+      let payload = {};
+      if (status === "approved") {
+        payload = {
+          orderId: newTransaction.orderId,
+          status: "approved",
+          transactionId: newTransaction.transactionId,
+          amount: newTransaction.amount,
+          currency: newTransaction.currency,
+          message: "This transaction has been approved."
+        };
+      } else {
+        payload = {
+          orderId: newTransaction.orderId,
+          status: "declined",
+          message: "Transaction has been declined. " + resp.data.message
+        };
+      }
+
+      res.status(200).json(payload);   
+    })
+    .catch((e) => {
+      console.log('mps-card-res-error', e.message);
+      res.status(200).json({
+        status: "fail",
+        message: "Bad request body"
+      });
+    });
+
+  } catch (e) {
+    console.log('mps-2d-error', e.message);
+    res.status(404).json({ 
+      status: "fail",
+      message: e.message 
+    });
+  }
 };
 
 export const callback_transxnd_hpp = async (req, res) => {
