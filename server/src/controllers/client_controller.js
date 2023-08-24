@@ -51,7 +51,7 @@ export const fetchTransactions = async (req, res) => {
       if (sortParsed.length > 0)
         sortParsed = sortParsed[0];
       else
-        sortParsed = {};
+        sortParsed = {field: 'createdAt', sort: 'desc' };
       
       const sortFormatted = {
         [sortParsed.field]: (sortParsed.sort === "asc" ? 1 : -1),
