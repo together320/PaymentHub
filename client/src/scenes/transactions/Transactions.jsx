@@ -53,21 +53,22 @@ const Transactions = () => {
       field: "orderId",
       headerName: "Order ID",
       flex: 1,
-    },{
-      field: "orderDetail",
-      headerName: "Order Detail",
-      flex: 1,
     },
+    // {
+    //   field: "orderDetail",
+    //   headerName: "Order Detail",
+    //   flex: 1,
+    // },
     {
       field: "transactionType",
       headerName: "Type",
       flex: 0.5,
     },
-    {
-      field: "paymentMethod",
-      headerName: "Solution",
-      flex: 0.5,
-    },
+    // {
+    //   field: "paymentMethod",
+    //   headerName: "Solution",
+    //   flex: 0.5,
+    // },
     // {
     //   field: "name",
     //   headerName: "Name",
@@ -113,11 +114,11 @@ const Transactions = () => {
       headerName: "Create Date",
       flex: 1,
     },
-    {
-      field: "statusDate",
-      headerName: "Status Date",
-      flex: 1,
-    },
+    // {
+    //   field: "statusDate",
+    //   headerName: "Status Date",
+    //   flex: 1,
+    // },
   ];
 
   if (authUser?.role === "admin" || authUser?.role === "superadmin") {
