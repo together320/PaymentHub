@@ -197,8 +197,8 @@ export const process_2d = async (req, res) => {
     let test = merchant.mode === "test";
     
     if (test) {
-      mps_key = MPS_KEY_TEST;
-      mps_secret = MPS_SECRET_TEST;
+      mps_key = MPS_KEY; // MPS_KEY_TEST;
+      mps_secret = MPS_SECRET; // MPS_SECRET_TEST;
     }
 
     const config = {
@@ -344,12 +344,22 @@ export const process_2d = async (req, res) => {
   }
 };
 
+// live
+const TRANSXND_S2S_URL = 'https://api.transxndpay.com/api/v2';
+const TRANSXND_S2S_ID = "169224841140330";
+const TRANSXND_S2S_KEY = "AfTAO1yy12UEajmd";
+
+// test
+const TRANSXND_S2S_URL_TEST = 'https://api.transxndpay.com/api/v2';
+const TRANSXND_S2S_ID_TEST = "TBD";
+const TRANSXND_S2S_KEY_TEST = "TBD";
+
 export const process_3d = async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   const data = req.body;
   console.log('data-3d', data);
 
-  if (!data.mid || !data.firstName || !data.lastName || !data.email || !data.phone || !data.address || !data.city || !data.state || !data.country || !data.zipCode || !data.cardNumber || !data.cardCVV || !data.cardExpYear ||  !data.cardExpMonth ||  !data.clientIp || !data.orderId || !data.orderDetail || !data.amount || !data.currency) {
+  if (!data.mid || !data.firstName || !data.lastName || !data.email || !data.phone || !data.address || !data.city || !data.state || !data.country || !data.zipCode || !data.cardNumber || !data.cardCVV || !data.cardExpYear ||  !data.cardExpMonth ||  !data.clientIp || !data.orderId || !data.orderDetail || !data.amount || !data.currency || !data.redirectUrl || !data.callbackUrl) {
     return res.status(200).json({
       status: "fail",
       message: "Required fields are not filled out."
@@ -365,35 +375,102 @@ export const process_3d = async (req, res) => {
       })
     }
 
-    let mps_key = "";
-    let mps_secret = "";
-
-    if (merchant.type === "2D (APM)") {
-      mps_key = MPS_KEY;
-      mps_secret = MPS_SECRET;
-    } else if (merchant.type === "2D (APM2)") {
-      mps_key = MPS_KEY2;
-      mps_secret = MPS_SECRET2;
-    } else {
-      return res.status(200).json({
-        status: "fail",
-        message: "This merchant is not allowed 2D transactions"
-      });
-    }
-
     let test = merchant.mode === "test";
     
-    if (test) {
-      mps_key = MPS_KEY_TEST;
-      mps_secret = MPS_SECRET_TEST;
-    }
+    await axios
+    .post(
+      (test?TRANSXND_S2S_URL_TEST:TRANSXND_S2S_URL) + '/generatePayToken',
+      {
+        clientId: test?TRANSXND_ID_TEST:TRANSXND_ID,
+        api_key: test?TRANSXND_KEY_TEST:TRANSXND_KEY
+      }
+    )
+    .then(async (resp) => {
+      console.log('3d-token-res', resp.data);
+      if (resp.data.status === "success") {
+        token = resp.data.data.token;
+        
+        const trxId = nanoid(8); // uuidv4();
 
-    const config = {
-      headers: {
-        'Authorization': `${mps_key}:${mps_secret}`,
-        'Content-Type': 'application/json'
-      },
-    };
+        const paybody_initiate = {
+          token,
+          orderId: trxId,
+          orderCurrency: data.currency,
+          cardNumber: data.cardNumber
+        };
+
+        const newTransaction = await Transaction.create({
+          merchantId: merchant.name,
+          transactionId: trxId,
+          transactionType: merchant.type,
+          paymentMethod: 'Transxnd',
+          firstName: data.firstName,
+          lastName: data.lastName,
+          name: data.firstName + ' ' + data.lastName,
+          email: data.email,
+          phone: data.phone,
+          address: data.address,
+          city: data.city,
+          state: data.state,
+          country: data.country,
+          zipCode: data.zipCode,
+          clientIp: data.clientIp?data.clientIp:req.ip,
+          amount: data.amount,
+          currency: data.currency,
+          orderId: data.orderId,
+          orderDetail: data.orderDetail,
+          cardType: data.cardType,
+          cardNumber: data.cardNumber,
+          cardCVV: data.cardCVV,
+          cardExpMonth: data.cardExpMonth,
+          cardExpYear: data.cardExpYear,
+          redirectUrl: data.redirectUrl,
+          callbackUrl: data.callbackUrl,
+          status: 'pending',
+          mode: test?"test":"live"
+
+        }); 
+
+        await axios
+        .post(
+          (test?TRANSXND_S2S_URL_TEST:TRANSXND_S2S_URL) + '/initiate_authentication',
+          paybody_initiate
+        )
+        .then(async (respp) => {
+          console.log('3d-init-res', respp.data);
+          if (respp.data.status === "success") {
+            ///////////////
+            ///////////////
+          } else {
+            res.status(200).json({
+              status: "fail",
+              message: respp.data.message
+            });
+          }
+        })
+        .catch((e) => {
+          console.log('3d-init-res-error', e.message);
+          res.status(200).json({
+            status: "fail",
+            message: "Failed to initiate authentication"
+          });
+        });
+
+      } else {
+        res.status(200).json({
+          status: "fail",
+          message: resp.data.message
+        });
+      }
+
+    })
+    .catch((e) => {
+      console.log('3d-token-res-error', e.message);
+      res.status(200).json({
+        status: "fail",
+        message: "Failed to generate pay token"
+      });
+    });
 
     const trxId = nanoid(8); // uuidv4();
 

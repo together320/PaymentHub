@@ -40,9 +40,12 @@ export const fetchMerchants = async (req, res) => {
 export const fetchTransactions = async (req, res) => {
   try {
     // sort should look like this: { "field": "userId", "sort": "desc"}
-    const { id, page = 1, pageSize = 20, sort = "[]", search = "" } = req.query;
+    const { id, startDate, endDate, page = 1, pageSize = 20, sort = "[]", search = "" } = req.query;
     // console.log('fetch transactions req', req.query);
     const user = JSON.parse(id);
+    const _startDate = new Date(startDate);
+    let _endDate = new Date(endDate);
+    _endDate.setDate(_endDate.getDate() + 1);
     // formatted sort should look like { userId: -1 }
     const generateSort = () => {
       let sortParsed = JSON.parse(sort);
@@ -67,6 +70,12 @@ export const fetchTransactions = async (req, res) => {
       criteria = {
         $and: [
           { merchantId: user.name },
+          { createdAt: 
+            {
+              $gte: _startDate,
+              $lte: _endDate
+            } 
+          },
           {
             $or: [
               { status: { $regex: new RegExp(search, "i") } },
@@ -81,13 +90,23 @@ export const fetchTransactions = async (req, res) => {
       };
     } else {
       criteria = {
-        $or: [
-          { status: { $regex: new RegExp(search, "i") } },
-          { merchantId: { $regex: new RegExp(search, "i") } },
-          { orderId: { $regex: new RegExp(search, "i") } },
-          { transactionId: { $regex: new RegExp(search, "i") } },
-          { paymentId: { $regex: new RegExp(search, "i") } },
-          { mode: { $regex: new RegExp(search, "i") } }
+        $and: [
+          { createdAt: 
+            {
+              $gte: _startDate,
+              $lte: _endDate
+            } 
+          },
+          {
+            $or: [
+              { status: { $regex: new RegExp(search, "i") } },
+              { merchantId: { $regex: new RegExp(search, "i") } },
+              { orderId: { $regex: new RegExp(search, "i") } },
+              { transactionId: { $regex: new RegExp(search, "i") } },
+              { paymentId: { $regex: new RegExp(search, "i") } },
+              { mode: { $regex: new RegExp(search, "i") } }
+            ]
+          }
         ]
       };
     }

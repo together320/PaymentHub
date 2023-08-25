@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { useGetTransactionsQuery, generalApi } from "state/api";
 import Header from "components/Header";
+import FlexBetween from "components/FlexBetween";
+import DatePicker from "react-datepicker";
 import { Box, useTheme, Button } from "@mui/material";
 // import { transactionTableColumns } from "utilities/CommonUtility";
 import DataGridCustomToolbar from 'components/DataGridCustomToolbar';
@@ -23,9 +25,37 @@ const Transactions = () => {
   const [isDetail, setIsDetail] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
+  // Current date
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+  const day = String(currentDate.getDate()).padStart(2, '0');  
+  const curDate = `${year}-${month}-${day}`;
+
+  currentDate.setMonth(currentDate.getMonth() - 1);
+  const pyear = currentDate.getFullYear();
+  const pmonth = String(currentDate.getMonth() + 1).padStart(2, '0');
+  const pday = String(currentDate.getDate()).padStart(2, '0');
+
+  const preDate = `${pyear}-${pmonth}-${pday}`;
+  const [startDate, setStartDate] = useState(new Date(preDate));
+  const [endDate, setEndDate] = useState(new Date(curDate));
+
   const { getAuthUser} = useContext(AuthContext);
   const authUser = getAuthUser();
   const navigate = useNavigate();
+
+  const dateToString = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Adding 1 as month is zero-based
+    const day = String(date.getDate()).padStart(2, '0');
+
+    // Format the date string
+    const formattedDate = `${year}-${month}-${day}`;
+    // console.log(formattedDate);
+    
+    return formattedDate;
+  }
 
   useEffect(() => {
     if (authUser === null) {
@@ -154,6 +184,8 @@ const Transactions = () => {
   
   const { data, isLoading, refetch } = useGetTransactionsQuery({
     id: authUser, 
+    startDate: dateToString(startDate), 
+    endDate: dateToString(endDate),
     page,
     pageSize,
     sort: JSON.stringify(sort),
@@ -237,7 +269,30 @@ const Transactions = () => {
     <Box m="1.5rem 2.5rem">
       {!isDetail && (
         <>
-          <Header title="TRANSACTION" subTitle="Entire list of transactions" />
+          <FlexBetween>
+            <Header title="TRANSACTION" subTitle="Entire list of transactions" />
+            <Box>
+              <Box>
+                <DatePicker
+                  selected={startDate}
+                  onChange={(date) => setStartDate(date)}
+                  selectsStart
+                  startDate={startDate}
+                  endDate={endDate}
+                />
+              </Box>
+              <Box>
+                <DatePicker
+                  selected={endDate}
+                  onChange={(date) => setEndDate(date)}
+                  selectsEnd
+                  startDate={startDate}
+                  endDate={endDate}
+                  minDate={startDate}
+                />
+              </Box>
+            </Box>
+          </FlexBetween>      
           <Box
             height="80vh"
             sx={{
