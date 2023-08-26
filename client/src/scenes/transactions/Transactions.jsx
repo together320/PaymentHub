@@ -326,7 +326,7 @@ const Transactions = () => {
                 rows={(data && data.transactions) || []}
                 columns={transactionTableColumns}
                 rowCount={(data && data.total) || 0}
-                rowsPerPageOptions={[20, 50, 100]}
+                rowsPerPageOptions={[20, 50, 100, 20000]}
                 pagination
                 page={page}
                 pageSize={pageSize}
