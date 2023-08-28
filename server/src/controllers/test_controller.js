@@ -34,6 +34,7 @@ export const test_3d = async (req, res) => {
   }).then(response => response.data);
 
   if (res3d.status === "verify") {
+    res.set("Content-Security-Policy", "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'");
     res.render('test_3d_verify.ejs', {
       content: res3d.redirect.html
     });
