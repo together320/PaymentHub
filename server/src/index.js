@@ -60,7 +60,7 @@ app.use("/api/sales", salesRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/payment", paymentRoutes);
 
-app.use("/test", testRoutes);
+app.use("/api/test", testRoutes);
 
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 9000;

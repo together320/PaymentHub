@@ -123,7 +123,7 @@ export const process_hpp = async (req, res) => {
       } else {
         res.status(200).json({
           status: "fail",
-          message: resp.data
+          message: "Request Failed"
         });
       }
     })
@@ -357,7 +357,6 @@ const TRANSXND_S2S_KEY_TEST = "LE4M4zO4GrgXN9Jk";
 export const process_3d = async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   const data = req.body;
-  console.log('data-3d', req.body);
 
   if (!data.mid || !data.firstName || !data.lastName || !data.email || !data.phone || !data.address || !data.city || !data.state || !data.country || !data.zipCode || !data.cardNumber || !data.cardCVV || !data.cardExpYear ||  !data.cardExpMonth ||  !data.clientIp || !data.orderId || !data.orderDetail || !data.amount || !data.currency || !data.redirectUrl || !data.callbackUrl) {
     return res.status(200).json({
@@ -396,6 +395,7 @@ export const process_3d = async (req, res) => {
         message: "Failed to generate pay token"
       });
     });
+    if (respt === undefined) return;
 
     console.log('3d-token-res', respt);
     if (respt.status !== "success") {
@@ -488,7 +488,7 @@ export const process_3d = async (req, res) => {
       cardExpiryYear: data.cardExpYear,
       browser: 'MOZILLA',
       ipAddress: '127.0.0.1',
-      redirect_url: 'http://localhost:5001/api/payment/3d/challenge'
+      redirect_url: 'https://paymenthub.uk/api/payment/3d/challenge'
     };
 
     const resap = await axios.post(`${url}/authenticate_payer`, payload_payer)

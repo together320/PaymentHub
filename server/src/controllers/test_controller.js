@@ -36,7 +36,7 @@ export const test_3d = async (req, res) => {
   if (res3d.status === "verify") {
     res.render('test_3d_verify.ejs', {
       content: res3d.redirect.html
-    })
+    });
     return;
   }
 
