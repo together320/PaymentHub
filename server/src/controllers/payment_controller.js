@@ -123,15 +123,15 @@ export const process_hpp = async (req, res) => {
       } else {
         res.status(200).json({
           status: "fail",
-          message: "Request failed"
+          message: resp.data.message
         });
-      }      
+      }
     })
     .catch((e) => {
       console.log('transxnd-hpp-resp-error', e.message);
       res.status(400).json({
         status: "fail",
-        message: "Request failed"
+        message: "Request failed by unknown error."
       });
     });
 
@@ -346,18 +346,18 @@ export const process_2d = async (req, res) => {
 
 // live
 const TRANSXND_S2S_URL = 'https://api.transxndpay.com/api/v2';
-const TRANSXND_S2S_ID = "169224841140330";
-const TRANSXND_S2S_KEY = "AfTAO1yy12UEajmd";
+const TRANSXND_S2S_ID = "169320678388686";
+const TRANSXND_S2S_KEY = "5S890jYiLEWxvOw2";
 
 // test
 const TRANSXND_S2S_URL_TEST = 'https://api.transxndpay.com/api/v2';
-const TRANSXND_S2S_ID_TEST = "TBD";
-const TRANSXND_S2S_KEY_TEST = "TBD";
+const TRANSXND_S2S_ID_TEST = "169303567919482";
+const TRANSXND_S2S_KEY_TEST = "LE4M4zO4GrgXN9Jk";
 
 export const process_3d = async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   const data = req.body;
-  console.log('data-3d', data);
+  console.log('data-3d', req.body);
 
   if (!data.mid || !data.firstName || !data.lastName || !data.email || !data.phone || !data.address || !data.city || !data.state || !data.country || !data.zipCode || !data.cardNumber || !data.cardCVV || !data.cardExpYear ||  !data.cardExpMonth ||  !data.clientIp || !data.orderId || !data.orderDetail || !data.amount || !data.currency || !data.redirectUrl || !data.callbackUrl) {
     return res.status(200).json({
@@ -376,94 +376,19 @@ export const process_3d = async (req, res) => {
     }
 
     let test = merchant.mode === "test";
+
+    const url = test ? TRANSXND_S2S_URL_TEST : TRANSXND_S2S_URL;
+    const clientId = test ? TRANSXND_S2S_ID_TEST : TRANSXND_S2S_ID;
+    const api_key = test ? TRANSXND_S2S_KEY_TEST : TRANSXND_S2S_KEY;
     
-    await axios
-    .post(
-      (test?TRANSXND_S2S_URL_TEST:TRANSXND_S2S_URL) + '/generatePayToken',
+    // generatePayToken
+    const respt = await axios.post(`${url}/generatePayToken`,
       {
-        clientId: test?TRANSXND_ID_TEST:TRANSXND_ID,
-        api_key: test?TRANSXND_KEY_TEST:TRANSXND_KEY
+        clientId,
+        api_key
       }
     )
-    .then(async (resp) => {
-      console.log('3d-token-res', resp.data);
-      if (resp.data.status === "success") {
-        token = resp.data.data.token;
-        
-        const trxId = nanoid(8); // uuidv4();
-
-        const paybody_initiate = {
-          token,
-          orderId: trxId,
-          orderCurrency: data.currency,
-          cardNumber: data.cardNumber
-        };
-
-        const newTransaction = await Transaction.create({
-          merchantId: merchant.name,
-          transactionId: trxId,
-          transactionType: merchant.type,
-          paymentMethod: 'Transxnd',
-          firstName: data.firstName,
-          lastName: data.lastName,
-          name: data.firstName + ' ' + data.lastName,
-          email: data.email,
-          phone: data.phone,
-          address: data.address,
-          city: data.city,
-          state: data.state,
-          country: data.country,
-          zipCode: data.zipCode,
-          clientIp: data.clientIp?data.clientIp:req.ip,
-          amount: data.amount,
-          currency: data.currency,
-          orderId: data.orderId,
-          orderDetail: data.orderDetail,
-          cardType: data.cardType,
-          cardNumber: data.cardNumber,
-          cardCVV: data.cardCVV,
-          cardExpMonth: data.cardExpMonth,
-          cardExpYear: data.cardExpYear,
-          redirectUrl: data.redirectUrl,
-          callbackUrl: data.callbackUrl,
-          status: 'pending',
-          mode: test?"test":"live"
-
-        }); 
-
-        await axios
-        .post(
-          (test?TRANSXND_S2S_URL_TEST:TRANSXND_S2S_URL) + '/initiate_authentication',
-          paybody_initiate
-        )
-        .then(async (respp) => {
-          console.log('3d-init-res', respp.data);
-          if (respp.data.status === "success") {
-            ///////////////
-            ///////////////
-          } else {
-            res.status(200).json({
-              status: "fail",
-              message: respp.data.message
-            });
-          }
-        })
-        .catch((e) => {
-          console.log('3d-init-res-error', e.message);
-          res.status(200).json({
-            status: "fail",
-            message: "Failed to initiate authentication"
-          });
-        });
-
-      } else {
-        res.status(200).json({
-          status: "fail",
-          message: resp.data.message
-        });
-      }
-
-    })
+    .then(response => response.data)
     .catch((e) => {
       console.log('3d-token-res-error', e.message);
       res.status(200).json({
@@ -472,36 +397,31 @@ export const process_3d = async (req, res) => {
       });
     });
 
-    const trxId = nanoid(8); // uuidv4();
+    console.log('3d-token-res', respt);
+    if (respt.status !== "success") {
+      return res.status(200).json({
+        status: "fail",
+        message: respt.message
+      });
+    }
 
-    const paybody = {
-      first_name: data.firstName,
-      last_name: data.lastName,
-      email: data.email,
-      mobile: data.phone,
-      billing_address1: data.address,
-      billing_address2: "",
-      billing_city: data.city,
-      billing_state: data.state,
-      billing_country: data.country,
-      billing_zip: data.zipCode,
-      order_id: trxId,
-      order_description: data.orderDetail,
-      description: data.orderDetail,
-      customer_ip: data.clientIp?data.clientIp:req.ip,
-      amount: data.amount,
-      card_no: data.cardNumber,
-      card_cvv: data.cardCVV,
-      expiry_month: data.cardExpMonth,
-      expiry_year: data.cardExpYear,
-      endpoint: SERVER_URL + '/payment/callbackMps'
+    const token = respt.data.token;
+    const trxId = nanoid(8);
+    
+    // initiate authentication
+    const payload_initiate = {
+      clientId,
+      token,
+      orderId: trxId,
+      orderCurrency: data.currency,
+      cardNumber: data.cardNumber
     };
 
     const newTransaction = await Transaction.create({
       merchantId: merchant.name,
       transactionId: trxId,
       transactionType: merchant.type,
-      paymentMethod: 'MPS',
+      paymentMethod: 'Transxnd',
       firstName: data.firstName,
       lastName: data.lastName,
       name: data.firstName + ' ' + data.lastName,
@@ -525,87 +445,153 @@ export const process_3d = async (req, res) => {
       redirectUrl: data.redirectUrl,
       callbackUrl: data.callbackUrl,
       status: 'pending',
-      mode: test?"test":"live"
-
-    }); 
-
-    await axios
-    .post(
-      MPS_URL + '/payment_api/card',
-      paybody,
-      config
-    )
-    .then(async (resp) => {
-      console.log('mps-pay-res', resp.data);
-
-      // if (resp.data.message) {
-      //   newTransaction.status = "declined";
-      //   newTransaction.response = JSON.stringify(resp.data);
-      //   newTransaction.statusDate = new Date();
-      //   newTransaction.paymentId = resp.transaction_id?resp.transaction_id:'';
-      //   await newTransaction.save();
-      //   return res.status(200).json({error: resp.data.message});
-      // }
-
-      if (resp.data.error) {
-        newTransaction.status = "error";
-        newTransaction.response = JSON.stringify(resp.data);
-        newTransaction.statusDate = new Date();
-        newTransaction.paymentId = resp.data.transaction_id?resp.data.transaction_id:'';
-        await newTransaction.save();
-       
-        return res.status(200).json({
-          status: "error",
-          message: resp.data.error});
-      }
-
-      let status = "";
-      if (resp.data.status === "success") {
-        status = "approved";
-      } else if (resp.data.status === "fail"){
-        status = "declined";
-      }
-      newTransaction.status = status;
-      newTransaction.response = JSON.stringify(resp.data);
-      newTransaction.statusDate = new Date();
-      newTransaction.paymentId = resp.data.transaction_id?resp.data.transaction_id:'';
-      await newTransaction.save();
-    
-      let payload = {};
-      if (status === "approved") {
-        payload = {
-          orderId: newTransaction.orderId,
-          status: "approved",
-          transactionId: newTransaction.transactionId,
-          amount: newTransaction.amount,
-          currency: newTransaction.currency,
-          message: "This transaction has been approved."
-        };
-      } else {
-        payload = {
-          orderId: newTransaction.orderId,
-          status: "declined",
-          message: "Transaction has been declined. " + resp.data.message
-        };
-      }
-
-      res.status(200).json(payload);   
-    })
-    .catch((e) => {
-      console.log('mps-card-res-error', e.message);
-      res.status(200).json({
-        status: "fail",
-        message: "Bad request body"
-      });
+      mode: test ? "test" : "live"
     });
+    const saveTransaction = async (status, response, transaction_id) => {
+      newTransaction.status = status ? 'approved' : 'declined';
+      newTransaction.response = JSON.stringify(response);
+      newTransaction.statusDate = new Date();
+      newTransaction.paymentId = transaction_id;
+      await newTransaction.save();
+    };
 
+    const resip = await axios.post(`${url}/initiate_authentication`, payload_initiate)
+      .then(response => response.data)
+      .catch((e) => {
+        console.log('3d-init-res-error', e.message);
+        res.status(200).json({
+          status: "fail",
+          message: "Failed to initiate authentication"
+        });
+      });
+    
+    console.log('3d-init-res', resip);
+    const t_id = resip.data.t_id;
+    if (resip.status !== "success") {
+      saveTransaction(false, resip, t_id);
+      return res.status(200).json({
+        status: "fail",
+        message: resip.message
+      });
+    }
+
+    // authentication payer
+    const payload_payer = {
+      clientId,
+      token,
+      t_id,
+      orderId: trxId,
+      orderAmount: data.amount,
+      orderCurrency: data.currency,
+      cardNumber: data.cardNumber,
+      cardExpiryMonth: data.cardExpMonth,
+      cardExpiryYear: data.cardExpYear,
+      browser: 'MOZILLA',
+      ipAddress: '127.0.0.1',
+      redirect_url: 'http://localhost:5001/api/payment/3d/challenge'
+    };
+
+    const resap = await axios.post(`${url}/authenticate_payer`, payload_payer)
+      .then(response => response.data)
+      .catch((e) => {
+        console.log('3d-auth-payer-error', e.message);
+        res.status(200).json({
+          status: "fail",
+          message: "Failed to authentication_payer"
+        });
+      });
+    
+    console.log('3d-auth-payer', resap.data);
+    if (resap.status !== "success") {
+      saveTransaction(false, resap, t_id);
+      return res.status(200).json({
+        status: "fail",
+        message: resap.message
+      });
+    }
+
+    if (resap.data.authentication.payerInteraction === 'REQUIRED') {
+      return res.status(200).json({
+        status: "verify",
+        message: resap.message,
+        redirect: resap.data.authentication.redirect
+      });
+    }
+    
+    // pay
+    const payload_pay = {
+      clientId,
+      token,
+      t_id,
+      orderId: trxId,
+      transaction_description: "Test",
+      orderAmount: data.amount,
+      orderCurrency: data.currency,
+      cardholderName: data.firstName + ' ' + data.lastName,
+      cardNumber: data.cardNumber,
+      cardExpiryMonth: data.cardExpMonth,
+      cardExpiryYear: data.cardExpYear,
+      cardSecurityCode: data.cardCVV,
+      billingAddress: {
+        country: data.country,
+        AddressLine1: data.address,
+        AddressLine2: "",
+        city: data.city,
+        postCode: data.zipCode,
+        state: data.state
+      }
+    };
+
+    const respay = await axios.post(`${url}/pay`, payload_pay)
+      .then(response => response.data)
+      .catch((e) => {
+        console.log('3d-pay-error', e.message);
+        res.status(200).json({
+          status: "fail",
+          message: "Failed to pay"
+        });
+      });
+
+    console.log('3d-pay-res', respay.data);
+    if (respay.status !== 'success') {
+      saveTransaction(false, respay, t_id);
+      return res.status(200).json({
+        status: "fail",
+        message: respay.message
+      });
+    }   
+
+    let payload = {};
+    if (respay.data.order.status === 'CAPTURED') {
+      saveTransaction(true, respay, t_id);
+      payload = {
+        orderId: newTransaction.orderId,
+        status: "approved",
+        transactionId: newTransaction.transactionId,
+        amount: newTransaction.amount,
+        currency: newTransaction.currency,
+        message: "This transaction has been approved."
+      };
+    } else {
+      saveTransaction(false, respay, t_id);
+      payload = {
+        orderId: newTransaction.orderId,
+        status: "declined",
+        message: "Transaction has been declined. " + respay.message
+      };
+    }
+
+    return res.status(200).json(payload);   
+    
+    
   } catch (e) {
-    console.log('mps-2d-error', e.message);
-    res.status(404).json({ 
+    console.log('process_3d_error', e.message);
+    res.status(200).json({
       status: "fail",
-      message: e.message 
+      message: "Fail by unknown error."
     });
   }
+         
 };
 
 export const callback_transxnd_hpp = async (req, res) => {

@@ -11,6 +11,7 @@ import managementRoutes from "./routes/management.js";
 import salesRoutes from "./routes/sales.js";
 import authRoutes from "./routes/auth.js";
 import paymentRoutes from "./routes/payment.js";
+import testRoutes from "./routes/test.js";
 
 
 import User from "./model/User.js";
@@ -43,6 +44,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
+app.set('view engine', 'ejs');
+
 // app.use(function(req, res, next) {
 //   res.header("Access-Control-Allow-Origin", "http://localhost");
 //   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -56,6 +59,8 @@ app.use("/api/management", managementRoutes);
 app.use("/api/sales", salesRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/payment", paymentRoutes);
+
+app.use("/test", testRoutes);
 
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 9000;
