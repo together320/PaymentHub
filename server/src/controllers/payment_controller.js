@@ -123,7 +123,7 @@ export const process_hpp = async (req, res) => {
       } else {
         res.status(200).json({
           status: "fail",
-          message: resp.data.message
+          message: resp.data
         });
       }
     })
