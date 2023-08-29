@@ -595,7 +595,7 @@ export const process_3d = async (req, res) => {
 };
 
 export const process_3d_challenge = async (req, res) => {
-  res.write("<div>fdafdasfdsafds</div>")
+  res.json(req.body);
 
 }
 
