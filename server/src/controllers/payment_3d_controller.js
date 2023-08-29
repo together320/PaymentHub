@@ -37,7 +37,7 @@ const call_gateway = async (body, endpoint, api_key) => {
     return { status: result.status, result: result.data, message: result.message };
   } catch (e) {
     console.log(`${endpoint} error:`, `${e.message}`);
-    return { status: "failed", message: e.message };
+    return { status: "fail", message: e.message };
   }
 };
 
@@ -48,7 +48,7 @@ const get_token = async (clientId, api_key) => {
   }, 'generatePayToken', api_key);
   const token = action.result?.token;
   if (!token) {
-    return { status: 'failed' };
+    return { status: 'fail' };
   }
   return { status: 'success', token };
 };
@@ -90,7 +90,7 @@ export const process_3d_initiate = async (req, res) => {
 
     const res_token = await get_token(clientId, api_key);
     if (res_token.status !== 'success') {
-      return res.status(200).json({ status: 'failed', message: 'Invalid Session' });
+      return res.status(200).json({ status: 'fail', message: 'Invalid Session' });
     }
     const token = res_token.token;
 
@@ -104,7 +104,7 @@ export const process_3d_initiate = async (req, res) => {
       cardNumber: data.cardNumber
     }, api_key);
     if (res_init.status !== 'success') {
-      return res.status(200).json({ status: 'failed', message: res_init.message });
+      return res.status(200).json({ status: 'fail', message: res_init.message });
     }
 
     let html = `<div style="display: none;">${res_init.result.authentication.redirect.html}</div>`;
@@ -125,7 +125,7 @@ export const process_3d_initiate = async (req, res) => {
       redirect_url: data.redirectUrl
     }, api_key);
     if (res_auth.status !== 'success') {
-      return res.status(200).json({ status: 'failed', message: res_auth.message });
+      return res.status(200).json({ status: 'fail', message: res_auth.message });
     }
 
     const trans = await Transaction.create({
@@ -181,7 +181,7 @@ export const process_3d_pay = async (req, res) => {
 
   if (!data.mid || !data.order_id) {
     return res.status(200).json({
-      status: 'failed',
+      status: 'fail',
       message: 'Required fields are not filled out.',
     });
   }
@@ -193,8 +193,9 @@ export const process_3d_pay = async (req, res) => {
 
     const merchant = await User.findOne({name: data.mid, apiKey, status: 'activated'});
     if (!merchant) {
+      save_transaction(trans, 'error', null, 'Transxnd');
       return res.status(200).json({
-        status: "fail",
+        status: "error",
         message: "There is not existing activated merchant with API key"
       })
     }
@@ -231,14 +232,15 @@ export const process_3d_pay = async (req, res) => {
     if (action.result?.order?.status !== 'CAPTURED' || action.status !== 'success') {
       save_transaction(trans, 'declined', action.result, 'Transxnd');
       return res.status(200).json({
-        status: 'failed',
-        message: 'Order status is captured or payment failed.'
+        status: 'declined',
+        message: action.message,
+        result: action.result.order
       });
     }
 
     save_transaction(trans, 'approved', action.result, 'Transxnd');
     return res.status(200).json({
-      status: 'success',
+      status: 'approved',
       result: action.result.order
     });
   } catch (e) {
