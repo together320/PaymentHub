@@ -487,7 +487,7 @@ export const process_3d = async (req, res) => {
       cardExpiryMonth: data.cardExpMonth,
       cardExpiryYear: data.cardExpYear,
       browser: 'MOZILLA',
-      ipAddress: '127.0.0.1',
+      ipAddress: data.clientIp,
       redirect_url: 'https://paymenthub.uk/api/payment/3d/challenge'
     };
 
@@ -502,7 +502,7 @@ export const process_3d = async (req, res) => {
       });
     
     console.log('3d-auth-payer', resap.data);
-    if (resap.status !== "success") {
+    if (resap.status !== "success" || resap.data.response.gatewayRecommendation !== 'PROCEED') {
       saveTransaction(false, resap, t_id);
       return res.status(200).json({
         status: "fail",
@@ -593,6 +593,11 @@ export const process_3d = async (req, res) => {
   }
          
 };
+
+export const process_3d_challenge = async (req, res) => {
+  res.write("<div>fdafdasfdsafds</div>")
+
+}
 
 export const callback_transxnd_hpp = async (req, res) => {
   console.log('---callback_transxnd_hpp---');
@@ -763,6 +768,8 @@ export const callback_mps = async (req, res) => {
     return res.status(500).json({success: false, message: 'Processing transaction failed.'});  
   }
 };
+
+
 
 export const fetch_status = async (req, res) => {
   const apiKey = req.headers['x-api-key'];
