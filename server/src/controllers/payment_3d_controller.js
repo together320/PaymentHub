@@ -160,11 +160,29 @@ export const process_3d_initiate = async (req, res) => {
 
     html += `<div>${res_auth.result.authentication.redirect.html}</div>`;
 
-    console.log(res_auth);
+    const result = {
+      ...res_auth.result,
+      authentication: {
+        ...res_auth.result.authentication,
+        redirect: {
+          ...res_auth.result.authentication.redirect,
+          html,
+        }
+      },
+      merchant: merchant.name,
+      order: {
+        ...res_auth.result.order,
+        id: data.orderId
+      },
+      transaction: {
+        ...res_auth.result.transaction,
+        id: trxId
+      }
+    };
 
     return res.status(200).json({
       status: 'success',
-      html
+      result
     });
   } catch (e) {
     console.log('initialize-error', e.message);
@@ -229,19 +247,34 @@ export const process_3d_pay = async (req, res) => {
       }
     }, 'pay', api_key);
 
+    const result = {
+      ...action.result,
+      merchant: merchant.name,
+      order: {
+        ...action.result.order,
+        id: trans.orderId
+      },
+      transaction: {
+        ...action.result.transaction,
+        id: trans.transactionId,
+        reference: trans.transactionId
+      }
+    };
+    console.log('pay result', result);
+
     if (action.result?.order?.status !== 'CAPTURED' || action.status !== 'success') {
       save_transaction(trans, 'declined', action.result, 'Transxnd');
       return res.status(200).json({
         status: 'declined',
         message: action.message,
-        result: action.result.order
+        result
       });
     }
 
     save_transaction(trans, 'approved', action.result, 'Transxnd');
     return res.status(200).json({
       status: 'approved',
-      result: action.result.order
+      result
     });
   } catch (e) {
     console.log('pay-error', e.message);
