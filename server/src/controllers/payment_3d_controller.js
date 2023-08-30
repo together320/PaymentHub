@@ -6,8 +6,8 @@ import { nanoid } from 'nanoid';
 
 // live
 const TRANSXND_S2S_URL = 'https://api.transxndpay.com/api/v2';
-const TRANSXND_S2S_ID = "169320678388686";
-const TRANSXND_S2S_KEY = "5S890jYiLEWxvOw2";
+const TRANSXND_S2S_ID = "169338565426519";
+const TRANSXND_S2S_KEY = "TDqg2iRKX8qTrrA6";
 
 // test
 const TRANSXND_S2S_URL_TEST = 'https://api.transxndpay.com/api/v2';
