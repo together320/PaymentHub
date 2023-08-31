@@ -176,9 +176,12 @@ export const process_3d_initiate = async (req, res) => {
       },
       transaction: {
         ...res_auth.result.transaction,
+        acquirer: { merchant: merchant.name },
         id: trxId
       }
     };
+
+    console.log('initialize-result:', result);
 
     return res.status(200).json({
       status: 'success',
@@ -256,11 +259,12 @@ export const process_3d_pay = async (req, res) => {
       },
       transaction: {
         ...action.result.transaction,
+        acquirer: { merchantId: merchant.name },
         id: trans.transactionId,
         reference: trans.transactionId
       }
     };
-    console.log('pay result', result);
+    console.log('pay result:', result);
 
     if (action.result?.order?.status !== 'CAPTURED' || action.status !== 'success') {
       save_transaction(trans, 'declined', action.result, 'Transxnd');
