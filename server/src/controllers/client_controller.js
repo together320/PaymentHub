@@ -41,7 +41,7 @@ export const fetchTransactions = async (req, res) => {
   try {
     // sort should look like this: { "field": "userId", "sort": "desc"}
     const { id, startDate, endDate, page = 1, pageSize = 20, sort = "[]", search = "" } = req.query;
-    // console.log('fetch transactions req', req.query);
+    console.log('fetch transactions search', search);
     const user = JSON.parse(id);
     const _startDate = new Date(startDate);
     let _endDate = new Date(endDate);
@@ -81,6 +81,8 @@ export const fetchTransactions = async (req, res) => {
               { status: { $regex: new RegExp(search, "i") } },
               { merchantId: { $regex: new RegExp(search, "i") } },
               { orderId: { $regex: new RegExp(search, "i") } },
+              { cardNumber: { $regex: new RegExp(search, "i") } },
+              { transactionType: { $regex: new RegExp(search, "i") } },
               { transactionId: { $regex: new RegExp(search, "i") } },
               { paymentId: { $regex: new RegExp(search, "i") } },
               { mode: { $regex: new RegExp(search, "i") } }
@@ -102,6 +104,8 @@ export const fetchTransactions = async (req, res) => {
               { status: { $regex: new RegExp(search, "i") } },
               { merchantId: { $regex: new RegExp(search, "i") } },
               { orderId: { $regex: new RegExp(search, "i") } },
+              { cardNumber: { $regex: new RegExp(search, "i") } },
+              { transactionType: { $regex: new RegExp(search, "i") } },
               { transactionId: { $regex: new RegExp(search, "i") } },
               { paymentId: { $regex: new RegExp(search, "i") } },
               { mode: { $regex: new RegExp(search, "i") } }

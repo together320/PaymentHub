@@ -131,7 +131,7 @@ export const process_3d_initiate = async (req, res) => {
     const trans = await Transaction.create({
       merchantId: merchant.name,
       transactionId: trxId,
-      transactionType: merchant.type,
+      transactionType: 'S2S',
       paymentId: res_init.result.t_id,
       firstName: data.firstName,
       lastName: data.lastName,
