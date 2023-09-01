@@ -520,7 +520,7 @@ export const callback_mps = async (req, res) => {
 export const fetch_status = async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   const data = req.body;
-  console.log('fetch-status', data);
+  console.log('fetch-status', data, apiKey);
 
   try {
     const merchant = await User.findOne({name: data.mid, apiKey, status: 'activated'});
