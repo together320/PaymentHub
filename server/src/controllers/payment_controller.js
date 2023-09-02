@@ -520,10 +520,11 @@ export const callback_mps = async (req, res) => {
 export const fetch_status = async (req, res) => {
   const apiKey = req.headers['x-api-key'];
   const data = req.body;
-  console.log('fetch-status', data, apiKey);
+  console.log('fetch-status', data);
 
   try {
     const merchant = await User.findOne({name: data.mid, apiKey, status: 'activated'});
+    // console.log('merchant', merchant);
     if (!merchant) {
       return res.status(200).json({
         success: false,
@@ -540,7 +541,7 @@ export const fetch_status = async (req, res) => {
 		if (!transaction) {
 			return res.status(200).json({
         success: false,
-        message: "There is not existing activated merchant with API key"
+        message: "There is not existing transaction with provided order id and transaction id"
       })
 		}
 		
