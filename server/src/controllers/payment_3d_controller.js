@@ -10,7 +10,7 @@ const TRANSXND_S2S_ID = "169338565426519";
 const TRANSXND_S2S_KEY = "TDqg2iRKX8qTrrA6";
 
 // test
-const TRANSXND_S2S_URL_TEST = 'https://api.transxndpay.com/api/v2';
+const TRANSXND_S2S_URL_TEST = 'https://dev.api.transxndpay.com/api/v2';
 const TRANSXND_S2S_ID_TEST = "169303567919482";
 const TRANSXND_S2S_KEY_TEST = "LE4M4zO4GrgXN9Jk";
 
