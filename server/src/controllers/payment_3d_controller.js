@@ -23,9 +23,9 @@ const save_transaction = async (trans, status, response, token) => {
   await trans.save();
 };
 
-const call_gateway = async (body, endpoint, api_key) => {
+const call_gateway = async (url, body, endpoint, api_key) => {
   try {
-    const result = await axios.post(`${TRANSXND_S2S_URL}/${endpoint}`, body, {
+    const result = await axios.post(`${url}/${endpoint}`, body, {
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
@@ -41,8 +41,8 @@ const call_gateway = async (body, endpoint, api_key) => {
   }
 };
 
-const get_token = async (clientId, api_key) => {
-  const action = await call_gateway({
+const get_token = async (url, clientId, api_key) => {
+  const action = await call_gateway(url, {
     clientId,
     api_key
   }, 'generatePayToken', api_key);
@@ -53,13 +53,13 @@ const get_token = async (clientId, api_key) => {
   return { status: 'success', token };
 };
 
-const initiate_authentication = async (body, api_key) => {
-  const action = await call_gateway(body, 'initiate_authentication', api_key);
+const initiate_authentication = async (url, body, api_key) => {
+  const action = await call_gateway(url, body, 'initiate_authentication', api_key);
   return action;
 };
 
-const authenticate_payment = async (body, api_key) => {
-  const action = await call_gateway(body, 'authenticate_payer', api_key);
+const authenticate_payment = async (url, body, api_key) => {
+  const action = await call_gateway(url, body, 'authenticate_payer', api_key);
   return action;
 };
 
@@ -88,7 +88,7 @@ export const process_3d_initiate = async (req, res) => {
     const clientId = test ? TRANSXND_S2S_ID_TEST : TRANSXND_S2S_ID;
     const api_key = test ? TRANSXND_S2S_KEY_TEST : TRANSXND_S2S_KEY;
 
-    const res_token = await get_token(clientId, api_key);
+    const res_token = await get_token(url, clientId, api_key);
     if (res_token.status !== 'success') {
       return res.status(200).json({ status: 'fail', message: 'Invalid Session' });
     }
@@ -96,7 +96,7 @@ export const process_3d_initiate = async (req, res) => {
 
     const trxId = nanoid(8);
 
-    const res_init = await initiate_authentication({
+    const res_init = await initiate_authentication(url, {
       clientId,
       token,
       orderId: trxId,
@@ -109,7 +109,7 @@ export const process_3d_initiate = async (req, res) => {
 
     let html = `<div style="display: none;">${res_init.result.authentication.redirect.html}</div>`;
 
-    const res_auth = await authenticate_payment({
+    const res_auth = await authenticate_payment(url, {
       clientId,
       token,
       t_id: res_init.result.t_id,
@@ -227,7 +227,7 @@ export const process_3d_pay = async (req, res) => {
     const clientId = test ? TRANSXND_S2S_ID_TEST : TRANSXND_S2S_ID;
     const api_key = test ? TRANSXND_S2S_KEY_TEST : TRANSXND_S2S_KEY;
 
-    const action = await call_gateway({
+    const action = await call_gateway(url, {
       clientId,
       token: trans.paymentMethod,
       t_id: trans.paymentId,
